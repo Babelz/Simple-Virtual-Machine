@@ -172,7 +172,7 @@ namespace SVMT
                 program.AddBytes(Opcodes.Inc_Stack, Sizes.WORD);
             }
 
-            program.AddBytes(Opcodes.CopyStack_Direct, Registers.AA, Sizes.WORD, Sizes.WORD, 66, 0);
+            program.AddBytes(Opcodes.CopyStack_Direct, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
 
             svm.Initialize();
             svm.RunProgram(program);

@@ -6,8 +6,8 @@ Started memory layout reconstruction. Registers are no longer fields inside the 
 but instead live in the same memory space as the stack. Now the memory layout will 
 be constructed as follows:
 	   
-	  66-bytes     n-bytes
-[ register space ][ stack ]
+	  62-bytes     n-bytes
+[0.. register space ..67][68.. stack ..]
 
 Register space will take total of 496 bits (62 bytes total). This should simplify our logic and boost our performance
 when dealing with register operations.
