@@ -143,7 +143,7 @@ namespace SVM
             sp += offset;
 
             // TODO: insert real exception handling.
-            if (sp < StackLowAddress) throw new InvalidOperationException("Stack underflow");
+            if (sp > StackLowAddress && sp < StackHighAddress) throw new InvalidOperationException("Stack underflow");
         }
         #endregion
 
