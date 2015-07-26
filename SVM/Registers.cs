@@ -18,9 +18,9 @@ namespace SVM
         public static readonly byte RegistersLowAddress = 0;
         
         /// <summary>
-        /// High address of registers.
+        /// High address of registers. 
         /// </summary>
-        public static readonly byte RegisterHighAddress = 66;
+        public static readonly byte RegisterHighAddress = 67;
 
         /*
          * 8-bit registers.

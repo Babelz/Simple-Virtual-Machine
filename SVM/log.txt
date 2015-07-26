@@ -3,13 +3,13 @@
 19:40
 
 Started memory layout reconstruction. Registers are no longer fields inside the machine,
-but insted live in the same memory space as the virtual machine. Now the memory layout will 
+but instead live in the same memory space as the stack. Now the memory layout will 
 be constructed as follows:
 	   
-	  60-bytes     n-bytes
+	  66-bytes     n-bytes
 [ register space ][ stack ]
 
-Register space will take total of 480 bits (60 bytes total). This should simplify our logic and boost our performance
+Register space will take total of 496 bits (62 bytes total). This should simplify our logic and boost our performance
 when dealing with register operations.
 
 20:24
@@ -19,12 +19,12 @@ Started to refactor and optimize the code base.
 23:01
 
 Done with optimizing. Optimized addition speed and gained around 25x times better performance. Byte and int
-convertions need the same facelift aswel.
+conversions need the same facelift as well.
 
 25.7.2015
 
 23:41
 
-All byte helper functions have been reimplemented. Performance boost vary from function to function, but 
+All byte helper functions have been reimplemented. Performance increases vary from function, but 
 on average the gains are huge. Addition gained 25x more speed at second implementation, and when comparing
-the third one to the first one, gains are around 50-70x
+the third one to the first one, gains are around 50-70x.

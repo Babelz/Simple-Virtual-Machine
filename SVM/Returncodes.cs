@@ -10,9 +10,9 @@ namespace SVM
     {
         #region Fields
         /// <summary>
-        /// No errors.
+        /// Default return code.
         /// </summary>
-        public static byte NO_ERRORS = 0;
+        public static byte DEFAULT_RET_CODE = 0;
 
         /// <summary>
         /// Debug exception was thrown.

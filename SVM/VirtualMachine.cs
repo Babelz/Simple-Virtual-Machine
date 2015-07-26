@@ -61,14 +61,14 @@ namespace SVM
         {
             get
             {
-                return memory.HighAddress - Registers.RegisterHighAddress;
+                return memory.HighAddress - Registers.RegisterHighAddress + 1;
             }
         }
         public int StackLowAddress
         {
             get
             {
-                return Registers.RegisterHighAddress;
+                return Registers.RegisterHighAddress + 1;
             }
         }
         public int StackHighAddress
@@ -162,7 +162,7 @@ namespace SVM
             // Stack pointer should start from register 
             // high address since registers live below this 
             // address.
-            sp = Registers.RegisterHighAddress;
+            sp = Registers.RegisterHighAddress + 1;
 
             // Reset pc and retpc registers.
             pc = retpc = 0;
@@ -585,7 +585,7 @@ namespace SVM
 
                     //if (!running) return stack.ReadByte(sp - 1);
 
-                    if (pc >= program.Length) return ReturnCodes.NO_ERRORS;
+                    if (pc >= program.Length) return ReturnCodes.DEFAULT_RET_CODE;
                 }
 
                 return memory.ReadByte(sp - 1);
