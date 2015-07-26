@@ -213,18 +213,10 @@ namespace SVM
         /// <param name="lhs">left hand side bytes</param>
         /// <param name="rhs">right hand side bytes</param>
         /// <returns>lhs + rhs</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int AddInt(byte[] lhs, byte[] rhs)
         {
-            bool carry = false;
-
-            return AddInt(lhs, rhs, ref carry);
-        }
-
-        public static int AddInt(byte[] lhs, byte[] rhs, ref bool carry)
-        {
             int result = 0;
-            carry = false;
+            bool carry = false;
 
             // This way of doing this is around 25 times faster than 
             // "normal way" (using loops etc). It is ugly as fuck but hey!
@@ -434,209 +426,219 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] AddBytes(byte[] lhs, byte[] rhs)
         {
-            bool carry = false;
-
-            return AddBytes(lhs, rhs, ref carry);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte[] AddBytes(byte[] lhs, byte[] rhs, ref bool carry)
-        {
             byte[] result = new byte[lhs.Length];
 
-            carry = false;
+            bool carry = false;
 
-            if (lhs[0] == 0 && rhs[0] == 0) goto b_8;
+            int bit = 0;
 
-            int bit = ((lhs[0] >> 0) & 1) + ((rhs[0] >> 0) & 1);
-            carry = bit == 2;
-            if (bit == 1 && !carry) result[0] |= 1 << 0;
+            if (lhs[0] != 0 && rhs[0] != 0)
+            {
+                bit = ((lhs[0] >> 0) & 1) + ((rhs[0] >> 0) & 1);
+                carry = bit == 2;
+                if (bit == 1 && !carry) result[0] |= 1 << 0;
 
-            bit = ((lhs[0] >> 1) & 1) + ((rhs[0] >> 1) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 1; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 1;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 1; }
+                bit = ((lhs[0] >> 1) & 1) + ((rhs[0] >> 1) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 1; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 1;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 1; }
 
-            bit = ((lhs[0] >> 2) & 1) + ((rhs[0] >> 2) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 2; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 2;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 2; }
+                bit = ((lhs[0] >> 2) & 1) + ((rhs[0] >> 2) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 2; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 2;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 2; }
 
-            bit = ((lhs[0] >> 3) & 1) + ((rhs[0] >> 3) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 3; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 3;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 3; }
+                bit = ((lhs[0] >> 3) & 1) + ((rhs[0] >> 3) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 3; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 3;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 3; }
 
-            bit = ((lhs[0] >> 4) & 1) + ((rhs[0] >> 4) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 4; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 4;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 4; }
+                bit = ((lhs[0] >> 4) & 1) + ((rhs[0] >> 4) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 4; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 4;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 4; }
 
-            bit = ((lhs[0] >> 5) & 1) + ((rhs[0] >> 5) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 5; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 5;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 5; }
+                bit = ((lhs[0] >> 5) & 1) + ((rhs[0] >> 5) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 5; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 5;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 5; }
 
-            bit = ((lhs[0] >> 6) & 1) + ((rhs[0] >> 6) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 6; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 6;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 6; }
+                bit = ((lhs[0] >> 6) & 1) + ((rhs[0] >> 6) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 6; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 6;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 6; }
 
-            bit = ((lhs[0] >> 7) & 1) + ((rhs[0] >> 7) & 1);
-            if (bit == 2) { if (carry) result[0] |= 1 << 7; else carry = true; }
-            else if (bit == 1 && !carry) result[0] |= 1 << 7;
-            else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 7; }
+                bit = ((lhs[0] >> 7) & 1) + ((rhs[0] >> 7) & 1);
+                if (bit == 2) { if (carry) result[0] |= 1 << 7; else carry = true; }
+                else if (bit == 1 && !carry) result[0] |= 1 << 7;
+                else if (bit == 0 && carry) { carry = false; result[0] |= 1 << 7; }
+            }
 
-        b_8:
             if (lhs.Length >= 2)
             {
                 if (lhs[1] == 0 && rhs[1] == 0)
                 {
-                    if (carry) { carry = false; result[1] |= 1 << 0; } goto b_16;
+                    if (carry)
+                    {
+                        carry = false; 
+                        result[1] |= 1 << 0;
+                    }
+                }
+                else
+                {
+                    bit = ((lhs[1] >> 0) & 1) + ((rhs[1] >> 0) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 0; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 0;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 0; }
+
+                    bit = ((lhs[1] >> 1) & 1) + ((rhs[1] >> 1) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 1; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 1;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 1; }
+
+                    bit = ((lhs[1] >> 2) & 1) + ((rhs[1] >> 2) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 2; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 2;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 2; }
+
+                    bit = ((lhs[1] >> 3) & 1) + ((rhs[1] >> 3) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 3; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 3;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 3; }
+
+                    bit = ((lhs[1] >> 4) & 1) + ((rhs[1] >> 4) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 4; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 4;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 4; }
+
+                    bit = ((lhs[1] >> 5) & 1) + ((rhs[1] >> 5) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 5; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 5;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 5; }
+
+                    bit = ((lhs[1] >> 6) & 1) + ((rhs[1] >> 6) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 6; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 6;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 6; }
+
+                    bit = ((lhs[1] >> 7) & 1) + ((rhs[1] >> 7) & 1);
+                    if (bit == 2) { if (carry) result[1] |= 1 << 7; else carry = true; }
+                    else if (bit == 1 && !carry) result[1] |= 1 << 7;
+                    else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 7; }
                 }
             }
             else return result;
 
-            bit = ((lhs[1] >> 0) & 1) + ((rhs[1] >> 0) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 0; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 0;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 0; }
-
-            bit = ((lhs[1] >> 1) & 1) + ((rhs[1] >> 1) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 1; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 1;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 1; }
-
-            bit = ((lhs[1] >> 2) & 1) + ((rhs[1] >> 2) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 2; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 2;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 2; }
-
-            bit = ((lhs[1] >> 3) & 1) + ((rhs[1] >> 3) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 3; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 3;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 3; }
-
-            bit = ((lhs[1] >> 4) & 1) + ((rhs[1] >> 4) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 4; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 4;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 4; }
-
-            bit = ((lhs[1] >> 5) & 1) + ((rhs[1] >> 5) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 5; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 5;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 5; }
-
-            bit = ((lhs[1] >> 6) & 1) + ((rhs[1] >> 6) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 6; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 6;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 6; }
-
-            bit = ((lhs[1] >> 7) & 1) + ((rhs[1] >> 7) & 1);
-            if (bit == 2) { if (carry) result[1] |= 1 << 7; else carry = true; }
-            else if (bit == 1 && !carry) result[1] |= 1 << 7;
-            else if (bit == 0 && carry) { carry = false; result[1] |= 1 << 7; }
-
-        b_16:
             if (lhs.Length >= 3)
             {
                 if (lhs[2] == 0 && rhs[2] == 0)
                 {
-                    if (carry) { carry = false; result[2] |= 1 << 0; } goto b_24;
+                    if (carry)
+                    {
+                        carry = false; 
+                        result[2] |= 1 << 0;
+                    }
+                }
+                else
+                {
+
+                    bit = ((lhs[2] >> 0) & 1) + ((rhs[2] >> 0) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 0; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 0;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 0; }
+
+                    bit = ((lhs[2] >> 1) & 1) + ((rhs[2] >> 1) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 1; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 1;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 1; }
+
+                    bit = ((lhs[2] >> 2) & 1) + ((rhs[2] >> 2) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 2; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 2;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 2; }
+
+                    bit = ((lhs[2] >> 3) & 1) + ((rhs[2] >> 3) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 3; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 3;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 3; }
+
+                    bit = ((lhs[2] >> 4) & 1) + ((rhs[2] >> 4) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 4; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 4;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 4; }
+
+                    bit = ((lhs[2] >> 5) & 1) + ((rhs[2] >> 5) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 5; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 5;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 5; }
+
+                    bit = ((lhs[2] >> 6) & 1) + ((rhs[2] >> 6) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 6; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 6;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 6; }
+
+                    bit = ((lhs[2] >> 7) & 1) + ((rhs[2] >> 7) & 1);
+                    if (bit == 2) { if (carry) result[2] |= 1 << 7; else carry = true; }
+                    else if (bit == 1 && !carry) result[2] |= 1 << 7;
+                    else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 7; }
                 }
             }
             else return result;
 
-            bit = ((lhs[2] >> 0) & 1) + ((rhs[2] >> 0) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 0; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 0;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 0; }
-
-            bit = ((lhs[2] >> 1) & 1) + ((rhs[2] >> 1) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 1; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 1;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 1; }
-
-            bit = ((lhs[2] >> 2) & 1) + ((rhs[2] >> 2) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 2; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 2;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 2; }
-
-            bit = ((lhs[2] >> 3) & 1) + ((rhs[2] >> 3) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 3; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 3;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 3; }
-
-            bit = ((lhs[2] >> 4) & 1) + ((rhs[2] >> 4) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 4; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 4;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 4; }
-
-            bit = ((lhs[2] >> 5) & 1) + ((rhs[2] >> 5) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 5; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 5;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 5; }
-
-            bit = ((lhs[2] >> 6) & 1) + ((rhs[2] >> 6) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 6; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 6;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 6; }
-
-            bit = ((lhs[2] >> 7) & 1) + ((rhs[2] >> 7) & 1);
-            if (bit == 2) { if (carry) result[2] |= 1 << 7; else carry = true; }
-            else if (bit == 1 && !carry) result[2] |= 1 << 7;
-            else if (bit == 0 && carry) { carry = false; result[2] |= 1 << 7; }
-
-        b_24:
             if (lhs.Length >= 4)
             {
                 if (lhs[3] == 0 && rhs[3] == 0)
                 {
-                    if (carry) { carry = false; result[3] |= 1 << 0; } return result;
+                    if (carry)
+                    {
+                        carry = false; 
+                        result[3] |= 1 << 0;
+                    }
+                }
+                else
+                {
+                    bit = ((lhs[3] >> 0) & 1) + ((rhs[3] >> 0) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 0; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 0;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 0; }
+
+                    bit = ((lhs[3] >> 1) & 1) + ((rhs[3] >> 1) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 1; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 1;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 1; }
+
+                    bit = ((lhs[3] >> 2) & 1) + ((rhs[3] >> 2) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 2; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 2;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 2; }
+
+                    bit = ((lhs[3] >> 3) & 1) + ((rhs[3] >> 3) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 3; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 3;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 3; }
+
+                    bit = ((lhs[3] >> 4) & 1) + ((rhs[3] >> 4) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 4; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 4;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 4; }
+
+                    bit = ((lhs[3] >> 5) & 1) + ((rhs[3] >> 5) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 5; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 5;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 5; }
+
+                    bit = ((lhs[3] >> 6) & 1) + ((rhs[3] >> 6) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 6; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 6;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 6; }
+
+                    bit = ((lhs[3] >> 7) & 1) + ((rhs[3] >> 7) & 1);
+                    if (bit == 2) { if (carry) result[3] |= 1 << 7; else carry = true; }
+                    else if (bit == 1 && !carry) result[3] |= 1 << 7;
+                    else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 7; }
                 }
             }
-            else return result;
-
-            bit = ((lhs[3] >> 0) & 1) + ((rhs[3] >> 0) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 0; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 0;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 0; }
-
-            bit = ((lhs[3] >> 1) & 1) + ((rhs[3] >> 1) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 1; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 1;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 1; }
-
-            bit = ((lhs[3] >> 2) & 1) + ((rhs[3] >> 2) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 2; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 2;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 2; }
-
-            bit = ((lhs[3] >> 3) & 1) + ((rhs[3] >> 3) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 3; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 3;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 3; }
-
-            bit = ((lhs[3] >> 4) & 1) + ((rhs[3] >> 4) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 4; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 4;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 4; }
-
-            bit = ((lhs[3] >> 5) & 1) + ((rhs[3] >> 5) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 5; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 5;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 5; }
-
-            bit = ((lhs[3] >> 6) & 1) + ((rhs[3] >> 6) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 6; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 6;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 6; }
-
-            bit = ((lhs[3] >> 7) & 1) + ((rhs[3] >> 7) & 1);
-            if (bit == 2) { if (carry) result[3] |= 1 << 7; else carry = true; }
-            else if (bit == 1 && !carry) result[3] |= 1 << 7;
-            else if (bit == 0 && carry) { carry = false; result[3] |= 1 << 7; }
-
+            
             return result;
         }
 

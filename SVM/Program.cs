@@ -17,7 +17,12 @@ namespace SVM
             Process.GetCurrentProcess().PriorityBoostEnabled = true;
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
 
-            AddDirectStackPerformanceTest();
+            for (int i = 0; i < 10; i++)
+            {
+                AddDirectStackPerformanceTest();
+            }
+
+            Console.ReadKey();
         }
 
         public static void AddDirectStackPerformanceTest()
