@@ -20,7 +20,7 @@ namespace SVM
         /// <summary>
         /// High address of registers. 
         /// </summary>
-        public static readonly byte RegisterHighAddress = 67;
+        public static readonly byte RegisterHighAddress = 62;
 
         /*
          * 8-bit registers.
@@ -30,7 +30,7 @@ namespace SVM
         public static readonly byte C = 2;
         public static readonly byte D = 3;
 
-        /*
+        /* 
          * 16-bit registers.
          */
         public static readonly byte AA = 4;
@@ -41,24 +41,24 @@ namespace SVM
         /*
          * 32-bit registers.
          */
-        public static readonly byte AB = 14;
-        public static readonly byte BB = 18;
-        public static readonly byte CB = 22;
-        public static readonly byte DB = 26;
+        public static readonly byte AB = 12;
+        public static readonly byte BB = 16;
+        public static readonly byte CB = 20;
+        public static readonly byte DB = 24;
 
         /*
          * 64-bit registers.
          */
-        public static readonly byte AC = 34;
-        public static readonly byte BC = 42;
-        public static readonly byte CC = 50;
-        public static readonly byte DC = 58;
+        public static readonly byte AC = 28;
+        public static readonly byte BC = 36;
+        public static readonly byte CC = 44;
+        public static readonly byte DC = 52;
 
         /// <summary>
         /// Low address of the flags register.
         /// 16-bit register.
         /// </summary>
-        public static readonly byte FLAGS = 66;
+        public static readonly byte FLAGS = 60;
 
         /// <summary>
         /// Returns the size of given register in bytes.
