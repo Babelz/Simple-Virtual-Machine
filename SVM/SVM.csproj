@@ -54,7 +54,6 @@
     <Compile Include="Registers.cs" />
     <Compile Include="ReturnCodes.cs" />
     <Compile Include="Sizes.cs" />
-    <Compile Include="Formatters.cs" />
     <Compile Include="VirtualMachine.cs" />
   </ItemGroup>
   <ItemGroup>

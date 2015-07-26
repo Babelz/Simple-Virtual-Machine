@@ -230,6 +230,7 @@ namespace SVM
         /// </summary>
         public static readonly Opcode StackAlloc = new Opcode(0x0006, 2, AddressingMode.Direct);
 
+        // TODO: is this shit needed?
         /// <summary>
         /// Clears given amount of bytes from the stack.
         /// 
@@ -242,7 +243,7 @@ namespace SVM
         /// 
         /// array [register (begin)] [register (end)] [register (elements count)] [elements size (word)]
         /// </summary>
-        public static readonly Opcode GenerateArray_DirectRegister = new Opcode(0x0026, 4, AddressingMode.DirectRegister);
+        public static readonly Opcode GenerateArray_IndirectRegister = new Opcode(0x0026, 4, AddressingMode.IndirectRegister);
 
         /// <summary>
         /// Allocates new array of given size. Stores begin and end address to the stack.
@@ -251,7 +252,7 @@ namespace SVM
         /// 
         /// Values store are 32-bit addresses.
         /// </summary>
-        public static readonly Opcode GenerateArray_DirectStack = new Opcode(0x0036, 4, AddressingMode.DirectRegister);
+        public static readonly Opcode GenerateArray_IndirectStack = new Opcode(0x0036, 4, AddressingMode.IndirectStack);
         
         #endregion
 
@@ -279,7 +280,7 @@ namespace SVM
         /// 
         /// copystack [size] [address_register] [target_register]
         /// </summary>
-        public static readonly Opcode CopyStack_Register = new Opcode(0x0027, 3, AddressingMode.DirectRegister);
+        public static readonly Opcode CopyStack_IndirectRegister = new Opcode(0x0027, 3, AddressingMode.IndirectRegister);
 
 
         /// <summary>
@@ -294,7 +295,7 @@ namespace SVM
         /// 
         /// setstack [address_register] [size] [value]
         /// </summary>
-        public static readonly Opcode PtrStack_DirectRegister = new Opcode(0x0047, 3, AddressingMode.DirectRegister);
+        public static readonly Opcode PtrStack_IndirectRegister = new Opcode(0x0047, 3, AddressingMode.IndirectRegister);
 
         /// <summary>
         /// Clears given register.

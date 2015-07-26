@@ -9,3 +9,4 @@ C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Debug\SVM.exe
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Debug\SVM.pdb
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Debug\SVM.exe
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Debug\SVM.pdb
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Debug\SVM.csprojResolveAssemblyReference.cache

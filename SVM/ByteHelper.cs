@@ -207,10 +207,10 @@ namespace SVM
 
         /// <summary>
         /// Adds two variables presented as bytes together 
-        /// and returns the result to the caller. Thins function supports
+        /// and returns the result to the caller. This function supports
         /// max of 4-bytes per variable currently.
         /// </summary>
-        /// <param name="lhs">lef hand side bytes</param>
+        /// <param name="lhs">left hand side bytes</param>
         /// <param name="rhs">right hand side bytes</param>
         /// <returns>lhs + rhs</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -425,10 +425,10 @@ namespace SVM
 
         /// <summary>
         /// Adds two variables presented as bytes together 
-        /// and returns the result to the caller. Thins function supports
+        /// and returns the result to the caller. This function supports
         /// max of 4-bytes per variable currently.
         /// </summary>
-        /// <param name="lhs">lef hand side bytes</param>
+        /// <param name="lhs">left hand side bytes</param>
         /// <param name="rhs">right hand side bytes</param>
         /// <returns>lhs + rhs</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -445,11 +445,6 @@ namespace SVM
             byte[] result = new byte[lhs.Length];
 
             carry = false;
-
-#if DEBUG
-            string lhsBin = ByteHelper.ToBinaryString(lhs);
-            string rhsBin = ByteHelper.ToBinaryString(rhs);
-#endif
 
             if (lhs[0] == 0 && rhs[0] == 0) goto b_8;
 

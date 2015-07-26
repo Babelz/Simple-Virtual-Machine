@@ -35,8 +35,8 @@ namespace SVM
         // 
         // Example of how bits are laid out in the memory:
         //    - 16-bit variable example:
-        //          [0] = low order bits
-        //          [1] = high order bits
+        //          [0] = lsbs
+        //          [1] = msbs
         private readonly MemoryManager memory;
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace SVM
             sp += offset;
 
             // TODO: insert real exception handling.
-            if (sp < 60) throw new InvalidOperationException("Stack underflow");
+            if (sp < StackLowAddress) throw new InvalidOperationException("Stack underflow");
         }
         #endregion
 
@@ -304,7 +304,7 @@ namespace SVM
                 // Copy value from the stack to given register.
                 memory.WriteBytes(memory.ReadBytes(address, address + bytes), register);
             }
-            else if (opcode == Opcodes.CopyStack_Register)
+            else if (opcode == Opcodes.CopyStack_IndirectRegister)
             {
                 byte bytes = NextProgramByte();
                 byte addressRegister = NextProgramByte();
@@ -338,7 +338,7 @@ namespace SVM
 
                 memory.WriteBytes(valueBits, address);
             }
-            else if (opcode == Opcodes.PtrStack_DirectRegister)
+            else if (opcode == Opcodes.PtrStack_IndirectRegister)
             {
                 byte register = NextProgramByte();
                 byte bytes = NextProgramByte();
@@ -352,7 +352,7 @@ namespace SVM
 
                 memory.WriteBytes(bits, address);
             }
-            else if (opcode == Opcodes.GenerateArray_DirectRegister)
+            else if (opcode == Opcodes.GenerateArray_IndirectRegister)
             {
                 byte lowAddressRegister = NextProgramByte();
                 byte highAddressRegister = NextProgramByte();
@@ -372,7 +372,7 @@ namespace SVM
 
                 MoveStackPointer(totalBytes);
             }
-            else if (opcode == Opcodes.GenerateArray_DirectStack)
+            else if (opcode == Opcodes.GenerateArray_IndirectStack)
             {
                 byte elementsCountRegister = NextProgramByte();
                 byte elementSize = NextProgramByte();
