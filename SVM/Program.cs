@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -15,9 +16,20 @@ namespace SVM
         static void Main(string[] args)
         {
             Process.GetCurrentProcess().PriorityBoostEnabled = true;
-            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
 
-            for (int i = 0; i < 10; i++)
+            List<byte[]> bs = new List<byte[]>();
+            for (int i = 0; i < 100000; i++) bs.Add(ByteHelper.ToBytes(i, 4));
+
+            for (int i = 0; i < bs.Count; i++)
+            {
+                var b = ByteHelper.AddBytes(bs[i], bs[i]);
+
+                int j = ByteHelper.ToInt(b);
+
+                Debug.Assert(j == i * 2, i.ToString() + " ---- " + j.ToString());
+            }
+
+            for (int i = 0; i < 25; i++)
             {
                 AddDirectStackPerformanceTest();
             }

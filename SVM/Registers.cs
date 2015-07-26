@@ -68,7 +68,7 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte RegisterSize(byte lowAddress)
         {
-            if (lowAddress >= A && lowAddress <= D)             return 1;
+            if (lowAddress >= A && lowAddress <= C)             return 1;
             else if (lowAddress >= AA && lowAddress <= DA)      return 2;
             else if (lowAddress >= AB && lowAddress <= DB)      return 4;
             else if (lowAddress >= AC && lowAddress <= DC)      return 8;   
