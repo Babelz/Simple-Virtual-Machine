@@ -13,23 +13,24 @@ namespace SVM
 {
     class Program
     {
+        static VirtualMachine svm = new VirtualMachine(); 
+        static ByteCodeProgram program = new ByteCodeProgram();
+
         static void Main(string[] args)
         {
             Process.GetCurrentProcess().PriorityBoostEnabled = true;
 
-            List<byte[]> bs = new List<byte[]>();
-            for (int i = 0; i < 100000; i++) bs.Add(ByteHelper.ToBytes(i, 4));
+            program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
 
-            for (int i = 0; i < bs.Count; i++)
+            for (int i = 0; i < 100000; i++)
             {
-                var b = ByteHelper.AddBytes(bs[i], bs[i]);
-
-                int j = ByteHelper.ToInt(b);
-
-                Debug.Assert(j == i * 2, i.ToString() + " ---- " + j.ToString());
+                program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
+                program.AddBytes(Opcodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
             }
 
-            for (int i = 0; i < 25; i++)
+            program.AddBytes(Opcodes.Top, Sizes.WORD, Registers.BA);
+
+            for (int i = 0; i < int.MaxValue; i++)
             {
                 AddDirectStackPerformanceTest();
             }
@@ -39,18 +40,6 @@ namespace SVM
 
         public static void AddDirectStackPerformanceTest()
         {
-            ByteCodeProgram program = new ByteCodeProgram();
-            program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
-
-            for (int i = 0; i < 1000000; i++)
-            {
-                program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
-                program.AddBytes(Opcodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
-            }
-
-            program.AddBytes(Opcodes.Top, Sizes.WORD, Registers.BA);
-
-            VirtualMachine svm = new VirtualMachine();
             svm.Initialize();
 
             Stopwatch sw = new Stopwatch();
@@ -66,8 +55,8 @@ namespace SVM
             Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds);
             Console.WriteLine("BA: " + svm.ReadRegisterValue(Registers.BA));
 
-            svm.DumpStack();
-            svm.DumpRegisters();
+            /*svm.DumpStack();
+            svm.DumpRegisters();*/
         }
     }
 }

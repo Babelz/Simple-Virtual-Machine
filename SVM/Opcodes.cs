@@ -100,7 +100,7 @@ namespace SVM
         static Opcodes()
         {
             // Check that all opcodes have unique
-            // byte code. This is a dirty but the most
+            // codes. This is a dirty but the most
             // painless way to do this. Just use reflection to find 
             // all opcode fields and check them.
             IEnumerable<Opcode> codesQuery = typeof(Opcodes).GetFields(BindingFlags.Static | BindingFlags.Public)
@@ -110,7 +110,7 @@ namespace SVM
 
             List<Opcode> codes = codesQuery.ToList();
 
-            Console.WriteLine("Checking that all byte codes are unique...");
+            Console.WriteLine("Checking that all codes are unique...");
 
             for (int i = 0; i < codes.Count; i++)
             {
@@ -118,18 +118,18 @@ namespace SVM
                 {
                     if (i == j) continue;
 
-                    Debug.Assert(codes[i].Code != codes[j].Code, "Duplicated byte code found, code is " + codes[i].Code);
+                    Debug.Assert(codes[i].Code != codes[j].Code, "Duplicated code found, code is " + codes[i].Code);
                 }
 
                 codes.RemoveAt(i);
             }
 
-            Console.WriteLine("All byte codes are unique!");
-            Console.WriteLine("Total " + codesQuery.Count() + " byte codes were found");
+            Console.WriteLine("All codes are unique!");
+            Console.WriteLine("Total " + codesQuery.Count() + " codes were found");
 
-            // Print all unused byte codes.
+            // Print all unused code slots.
 
-            Console.WriteLine("Free byte codes are: ");
+            Console.WriteLine("Free code slots are: ");
 
             List<byte> byteCodes = codesQuery.Select(c => c.Code).ToList();
             int k = 0;
@@ -152,12 +152,12 @@ namespace SVM
                 }
             }
 
-            Console.WriteLine("\nTotal {0} byte codes are free", 255 - byteCodes.Count);
+            Console.WriteLine("\nTotal {0} free code slots", 255 - byteCodes.Count);
         }
 #endif
         #endregion
 
-        // TODO: reorder opcodes by byte code...
+        // TODO: reorder opcodes by code...
 
         /*
          * Stack operations.
