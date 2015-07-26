@@ -1,0 +1,11 @@
+c:\users\viihdemies\documents\visual studio 2013\Projects\SVM\SVM\bin\Debug\SVM.exe.config
+c:\users\viihdemies\documents\visual studio 2013\Projects\SVM\SVM\bin\Debug\SVM.exe
+c:\users\viihdemies\documents\visual studio 2013\Projects\SVM\SVM\bin\Debug\SVM.pdb
+c:\users\viihdemies\documents\visual studio 2013\Projects\SVM\SVM\obj\Debug\SVM.exe
+c:\users\viihdemies\documents\visual studio 2013\Projects\SVM\SVM\obj\Debug\SVM.pdb
+C:\Users\ViihdeMies\documents\visual studio 2013\Projects\SVM\SVM\obj\Debug\SVM.csprojResolveAssemblyReference.cache
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Debug\SVM.exe.config
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Debug\SVM.exe
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Debug\SVM.pdb
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Debug\SVM.exe
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Debug\SVM.pdb

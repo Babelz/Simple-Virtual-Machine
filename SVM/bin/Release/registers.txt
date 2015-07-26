@@ -1,0 +1,23 @@
+Registers
+
+Name:	A	Value:	0
+Name:	B	Value:	0
+Name:	C	Value:	0
+Name:	D	Value:	0
+
+Name:	AA	Value:	0
+Name:	BA	Value:	1
+Name:	CA	Value:	0
+Name:	DA	Value:	0
+
+Name:	AB	Value:	0
+Name:	BB	Value:	100
+Name:	CB	Value:	0
+Name:	DB	Value:	0
+
+Name:	AC	Value:	0
+Name:	BC	Value:	0
+Name:	CC	Value:	0
+Name:	DC	Value:	0
+
+

@@ -1,0 +1,5 @@
+C:\Users\ViihdeMies\documents\visual studio 2013\Projects\SVM\SVMTests\bin\Release\SVMTests.exe.config
+C:\Users\ViihdeMies\documents\visual studio 2013\Projects\SVM\SVMTests\bin\Release\SVMTests.exe
+C:\Users\ViihdeMies\documents\visual studio 2013\Projects\SVM\SVMTests\bin\Release\SVMTests.pdb
+C:\Users\ViihdeMies\documents\visual studio 2013\Projects\SVM\SVMTests\obj\Release\SVMTests.exe
+C:\Users\ViihdeMies\documents\visual studio 2013\Projects\SVM\SVMTests\obj\Release\SVMTests.pdb
