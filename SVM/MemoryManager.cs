@@ -65,7 +65,7 @@ namespace SVM
         /// <param name="value">value to insert</param>
         /// <param name="offset">address where the byte will be placed</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteByte(byte value, int offset)
+        public void WriteByte(int offset, byte value)
         {
             Debug.Assert(offset < HighAddress);
 
@@ -74,17 +74,15 @@ namespace SVM
         /// <summary>
         /// Inserts given chunk of bytes starting from given address.
         /// </summary>
-        /// <param name="bytes">bytes to insert</param>
+        /// <param name="buffer">bytes to insert</param>
         /// <param name="offset">address from where placing the bytes will start</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteBytes(byte[] bytes, int offset)
+        public void WriteBytes(int lowAddress, int highAddress, byte[] buffer)
         {
-            Debug.Assert(bytes.Length + offset < HighAddress, "Memory overflow.");
-
             int j = 0;
-            for (int i = offset; i < offset + bytes.Length; i++)
+            for (int i = lowAddress; i < highAddress; i++)
             {
-                chunk[i] = bytes[j];
+                chunk[i] = buffer[j];
                 j++;
             }
         }
@@ -97,32 +95,18 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte(int address)
         {
-            Debug.Assert(address < HighAddress);
-
             return chunk[address];
         }
         /// <summary>
-        /// Reads given amount of bytes.
+        /// Reads given amount of bytes to given buffer.
         /// </summary>
         /// <param name="lowAddress">low address (begin)</param>
         /// <param name="highAddress">bytes to read</param>
-        /// <returns>bytes</returns>
+        /// <param name="buffer">buffer where the bytes are stored</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte[] ReadBytes(int lowAddress, int highAddress)
+        public void ReadBytes(int lowAddress, int highAddress, byte[] buffer)
         {
-            Debug.Assert(lowAddress < highAddress);
-            Debug.Assert(lowAddress + highAddress < HighAddress, "RAM overflow.");
-            
-            byte[] values = new byte[highAddress - lowAddress];
-
-            int j = 0;
-            for (int i = lowAddress; i < highAddress; i++)
-            {
-                values[j] = chunk[i];
-                j++;
-            }
-
-            return values;
+            Array.Copy(chunk, lowAddress, buffer, 0, highAddress - lowAddress);
         }
 
         /// <summary>
@@ -133,8 +117,6 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reserve(int bytes, int offset)
         {
-            Debug.Assert(offset >= LowAddress && offset < HighAddress);
-
             if (bytes + offset >= HighAddress)
             {
                 // TODO: could do the following things..

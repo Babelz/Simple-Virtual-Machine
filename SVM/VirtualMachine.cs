@@ -40,6 +40,11 @@ namespace SVM
         private readonly MemoryManager memory;
 
         /// <summary>
+        /// Cache memory.
+        /// </summary>
+        private readonly Caches caches;
+
+        /// <summary>
         /// Stack pointer.
         /// </summary>
         private int sp;
@@ -84,7 +89,11 @@ namespace SVM
         {
             // 64Kb should be enough memory for the 
             // starters.
-            memory = new MemoryManager(Sizes.CHUNK_64KB);
+            memory = new MemoryManager(Sizes.CHUNK_2048KB);
+            
+            // 2048Kb should be enough for the cache
+            // at this time.
+            caches = new Caches(Sizes.CHUNK_128KB);
         }
 
         #region Private members
@@ -116,35 +125,26 @@ namespace SVM
         /// </summary>
         /// <returns>bytes from given offset location</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte[] NextProgramBytes(int count)
+        private byte[] NextProgramBytes(int bytes, int offset)
         {
-            int i = 0;
-            int pcn = pc + count;
-            byte[] bytes = new byte[count];
+            byte[] cache = caches.GetCacheOfSize(bytes, offset);
 
-            while (pc != pcn)
-            {
-                pc++;
+            Array.Copy(program, pc, cache, 0, bytes);
 
-                bytes[i] = program[pc];
-                
-                i++;
-            }
+            pc += bytes;
 
-            return bytes;
+            return cache;
         }
 
         /// <summary>
         /// Moves the stack pointer by given offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void MoveStackPointer(int offset)
+        private void MoveStackPointer(int bytes)
         {
-            sp += offset;
-
-            // TODO: insert real exception handling.
-            if (sp > StackLowAddress && sp < StackHighAddress) throw new InvalidOperationException("Stack underflow");
+            sp += bytes;
         }
+
         #endregion
 
         /// <summary>
@@ -154,10 +154,8 @@ namespace SVM
         /// </summary>
         public void Initialize()
         {
-            // Clear and reset memory size back to 
-            // 64kb which should be enough for starters.
             memory.Clear();
-            memory.Resize(Sizes.CHUNK_64KB);
+            caches.Clear();
 
             // Stack pointer should start from register 
             // high address since registers live below this 
@@ -173,7 +171,7 @@ namespace SVM
         private bool InterpretOpcode(byte opcode)
         {
             // Interpret next opcode and return.
-            if (opcode == Opcodes.Push_Direct)
+            if (opcode == Opcodes.Push_Direct.Code)
             {
                 // Get size of the variable in bytes.
                 byte bytes = NextProgramByte();
@@ -185,11 +183,11 @@ namespace SVM
 
                 // Reserve room for the bytes and write them to the stack.
                 memory.Reserve(bytes, sp);
-                memory.WriteBytes(bits, sp);
+                memory.WriteBytes(sp, sp + bytes, bits);
 
                 MoveStackPointer(bytes);
             }
-            else if (opcode == Opcodes.Push_Register)
+            else if (opcode == Opcodes.Push_Register.Code)
             {
                 // Read register address and get its size.
                 byte register = NextProgramByte();
@@ -200,37 +198,45 @@ namespace SVM
                 // Reserve memory for next push operation.
                 memory.Reserve(bytes, sp);
 
+                // Get reusable buffer to store the bytes.
+                byte[] cache = caches.GetCacheOfSize(bytes, 0);
+
+                // Copy memory to cache.
+                memory.ReadBytes(register, register + bytes, cache);
+
                 // Get the bytes and write them to the stack.
-                byte[] bits = memory.ReadBytes(register, register + bytes);
-                memory.WriteBytes(bits, sp);
+                memory.WriteBytes(sp, sp + bytes, cache);
 
                 MoveStackPointer(bytes);
             }
-            else if (opcode == Opcodes.Pop)
+            else if (opcode == Opcodes.Pop.Code)
             {
                 Debug.Assert(sp > Registers.RegisterHighAddress);
 
+                // Get count of bytes to pop.
                 byte bytes = NextProgramByte();
 
                 // Everything after this address is trash.
-                MoveStackPointer(bytes + 1);
-
-                memory.WriteByte(0, sp);
+                MoveStackPointer(-(bytes + 1));
             }
-            else if (opcode == Opcodes.Top)
+            else if (opcode == Opcodes.Top.Code)
             {
                 byte bytes = NextProgramByte();
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterSize(register);
 
+                // Get cache.
+                byte[] cache = caches.GetCacheOfSize(bytes, 0);
+
                 // Read bits.
-                byte[] bits = memory.ReadBytes(sp - bytes, sp);
+                memory.ReadBytes(sp - bytes, sp, cache);
 
                 Debug.Assert(registerCapacity >= bytes);
 
-                memory.WriteBytes(bits, register);
+                // Copy sp value to given register.
+                memory.WriteBytes(register, register + bytes, cache);
             }
-            else if (opcode == Opcodes.Sp)
+            else if (opcode == Opcodes.Sp.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = Registers.RegisterSize(register);
@@ -238,57 +244,57 @@ namespace SVM
                 // Check that the stack pointer fits to this register.
                 Debug.Assert(bytes >= 4);
 
-                memory.WriteBytes(ByteHelper.ToBytes(sp, 4), register);
+                memory.WriteBytes(register, register + 4, ByteHelper.ToBytes(sp, 4));
             }
-            else if (opcode == Opcodes.Abort)
+            else if (opcode == Opcodes.Abort.Code)
             {
-                Debug.Print("Abort has been called.");
-
+                Console.WriteLine("Abort has been called");
+                
                 memory.Reserve(1, sp);
-                memory.WriteByte(ReturnCodes.ABORT_CALLED, sp);
+                memory.WriteByte(sp, ReturnCodes.ABORT_CALLED);
 
                 MoveStackPointer(1);
 
                 return false;
             }
-            else if (opcode == Opcodes.StackAlloc)
+            else if (opcode == Opcodes.StackAlloc.Code)
             {
                 byte bytes = NextProgramByte();
-                byte[] bits = NextProgramBytes(bytes);
+                byte[] bits = NextProgramBytes(bytes, 0);
 
                 int bytesToAlloc = ByteHelper.ToInt(bits);
 
                 memory.Reserve(bytesToAlloc, sp);
             }
-            else if (opcode == Opcodes.ZeroMemory)
+            else if (opcode == Opcodes.ZeroMemory.Code)
             {
                 byte bytes = NextProgramByte();
-                byte[] bits = NextProgramBytes(bytes);
+                byte[] bits = NextProgramBytes(bytes, 0);
 
                 int bytesToClear = ByteHelper.ToInt(bits);
 
                 memory.Clear(sp - bytesToClear, sp);
             }
-            else if (opcode == Opcodes.Load)
+            else if (opcode == Opcodes.Load.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = NextProgramByte();
-                byte[] bits = NextProgramBytes(bytes);
+                byte[] bits = NextProgramBytes(bytes, 0);
 
                 byte registerCapacity = Registers.RegisterSize(register);
 
                 Debug.Assert(registerCapacity >= bytes);
 
-                memory.WriteBytes(bits, register);
+                memory.WriteBytes(register, register + registerCapacity, bits);
             }
-            else if (opcode == Opcodes.Clear)
+            else if (opcode == Opcodes.Clear.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = Registers.RegisterSize(register);
 
                 memory.Clear(register, register + bytes);
             }
-            else if (opcode == Opcodes.CopyStack_Direct)
+            else if (opcode == Opcodes.CopyStack_Direct.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = NextProgramByte();
@@ -302,9 +308,11 @@ namespace SVM
                 int address = ByteHelper.ToInt(addressBits);
 
                 // Copy value from the stack to given register.
-                memory.WriteBytes(memory.ReadBytes(address, address + bytes), register);
+                CopyToCache(address, address + bytes);
+
+                memory.WriteBytes(register, register + registerCapacity, caches);
             }
-            else if (opcode == Opcodes.CopyStack_IndirectRegister)
+            else if (opcode == Opcodes.CopyStack_IndirectRegister.Code)
             {
                 byte bytes = NextProgramByte();
                 byte addressRegister = NextProgramByte();
@@ -313,7 +321,11 @@ namespace SVM
                 byte targetRegisterCapacity = Registers.RegisterSize(targetRegister);
                 byte addressRegisterCapacity = Registers.RegisterSize(addressRegister);
 
-                byte[] addressBits = memory.ReadBytes(addressRegister, addressRegister + addressRegisterCapacity);
+                CopyToCache(addressRegister, addressRegister + addressRegisterCapacity);
+
+                byte[] buffer = GetCacheOfSize(bytes);
+
+                // TODO: finish new cache memory system
 
                 int address = ByteHelper.ToInt(addressBits);
 
@@ -324,7 +336,7 @@ namespace SVM
                 byte[] bits = memory.ReadBytes(sp - bytes, sp);
                 memory.WriteBytes(bits, targetRegister);
             }
-            else if (opcode == Opcodes.PtrStack)
+            else if (opcode == Opcodes.PtrStack.Code)
             {
                 byte bytes = NextProgramByte();
                 byte[] addressBits = NextProgramBytes(bytes);
@@ -338,7 +350,7 @@ namespace SVM
 
                 memory.WriteBytes(valueBits, address);
             }
-            else if (opcode == Opcodes.PtrStack_IndirectRegister)
+            else if (opcode == Opcodes.PtrStack_IndirectRegister.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = NextProgramByte();
@@ -352,7 +364,7 @@ namespace SVM
 
                 memory.WriteBytes(bits, address);
             }
-            else if (opcode == Opcodes.GenerateArray_IndirectRegister)
+            else if (opcode == Opcodes.GenerateArray_IndirectRegister.Code)
             {
                 byte lowAddressRegister = NextProgramByte();
                 byte highAddressRegister = NextProgramByte();
@@ -372,7 +384,7 @@ namespace SVM
 
                 MoveStackPointer(totalBytes);
             }
-            else if (opcode == Opcodes.GenerateArray_IndirectStack)
+            else if (opcode == Opcodes.GenerateArray_IndirectStack.Code)
             {
                 byte elementsCountRegister = NextProgramByte();
                 byte elementSize = NextProgramByte();
@@ -395,7 +407,7 @@ namespace SVM
                 memory.WriteBytes(ByteHelper.ToBytes(sp + totalBytes, 4), sp);
                 MoveStackPointer(4);
             }
-            else if (opcode == Opcodes.Add_DirectStack)
+            else if (opcode == Opcodes.Add_DirectStack.Code)
             {
                 byte aBytes = NextProgramByte();
                 byte bBytes = NextProgramByte();
@@ -412,7 +424,7 @@ namespace SVM
 
                 MoveStackPointer(aBytes);
             }
-            else if (opcode == Opcodes.Add_IndirectRegister_Stack)
+            else if (opcode == Opcodes.Add_IndirectRegister_Stack.Code)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
@@ -430,7 +442,7 @@ namespace SVM
 
                 MoveStackPointer(aBytes);
             }
-            else if (opcode == Opcodes.Add_IndirectRegister_Register)
+            else if (opcode == Opcodes.Add_IndirectRegister_Register.Code)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
@@ -447,7 +459,7 @@ namespace SVM
 
                 memory.WriteBytes(result, rRegister);
             }
-            else if (opcode == Opcodes.Add_DirectStackRegister_Stack)
+            else if (opcode == Opcodes.Add_DirectStackRegister_Stack.Code)
             {
                 byte bytes = NextProgramByte();
                 byte register = NextProgramByte();
@@ -465,7 +477,7 @@ namespace SVM
 
                 MoveStackPointer(bytes);
             }
-            else if (opcode == Opcodes.Add_DirectStackRegister_Register)
+            else if (opcode == Opcodes.Add_DirectStackRegister_Register.Code)
             {
                 // Get the size.
                 byte bytes = program[pc + 1];
@@ -474,7 +486,7 @@ namespace SVM
                 // Dirty hack optimizations?
                 // TODO: see if some of the add variants can be
                 //       done the same way.
-                opcode = Opcodes.Add_DirectStackRegister_Stack;
+                opcode = Opcodes.Add_DirectStackRegister_Stack.Code;
                 InterpretOpcode(opcode);
 
                 byte[] result = memory.ReadBytes(sp - bytes, sp);
@@ -489,7 +501,7 @@ namespace SVM
                 // Before this, we are pointing to this opcodes last argument.
                 MoveProgramCounter(1);
             }
-            else if (opcode == Opcodes.Inc_Reg)
+            else if (opcode == Opcodes.Inc_Reg.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = Registers.RegisterSize(register);
@@ -498,7 +510,7 @@ namespace SVM
 
                 memory.WriteBytes(result, register);
             }
-            else if (opcode == Opcodes.Inc_Stack)
+            else if (opcode == Opcodes.Inc_Stack.Code)
             {
                 byte bytes = NextProgramByte();
 
@@ -506,7 +518,7 @@ namespace SVM
 
                 memory.WriteBytes(result, sp - bytes);
             }
-            else if (opcode == Opcodes.Dec_Reg)
+            else if (opcode == Opcodes.Dec_Reg.Code)
             {
                 byte register = NextProgramByte();
                 byte bytes = Registers.RegisterSize(register);
@@ -515,7 +527,7 @@ namespace SVM
 
                 memory.WriteBytes(result, register);
             }
-            else if (opcode == Opcodes.Dec_Stack)
+            else if (opcode == Opcodes.Dec_Stack.Code)
             {
                 byte bytes = NextProgramByte();
 
@@ -523,9 +535,9 @@ namespace SVM
 
                 memory.WriteBytes(result, sp - bytes);
             }
-            else if (opcode == Opcodes.Halt)
+            else if (opcode == Opcodes.Halt.Code)
             {
-                Console.WriteLine("Halt was called!");
+                Console.WriteLine("Halt was called");
             }
             else
             {
@@ -549,7 +561,7 @@ namespace SVM
         }
         public void DumpRegisters()
         {
-            FileHelper.DumpRegisters("Registers", memory.ReadBytes(0, 60), "registers.txt");
+            FileHelper.DumpRegisters("Registers", memory.ReadBytes(0, Registers.RegisterHighAddress), "registers.txt");
         }
 
         public byte[] ReadMemoryBytes(int lowAddress, int highAddress)
@@ -583,21 +595,18 @@ namespace SVM
 
                     MoveProgramCounter(1);
 
-                    //if (!running) return stack.ReadByte(sp - 1);
-
                     if (pc >= program.Length) return ReturnCodes.DEFAULT_RET_CODE;
                 }
 
                 return memory.ReadByte(sp - 1);
-
 #if DEBUG
             }
             catch (Exception e)
             {
-                Console.WriteLine("Possible memory corruption, exception:\n\t " + e.Message);
-                Console.WriteLine("PC: " + pc);
-                Console.WriteLine("SP: " + sp);
-                Console.WriteLine("Dumping stack, program memory and registers to root");
+                Console.WriteLine(MessageType.Error, "Possible memory corruption, exception:\n\t " + e.Message);
+                Console.WriteLine(MessageType.Error, "PC: " + pc);
+                Console.WriteLine(MessageType.Error, "SP: " + sp);
+                Console.WriteLine(MessageType.Error, "Dumping stack, program memory and registers to root");
 
                 DumpStack();
                 DumpProgram();
@@ -606,6 +615,6 @@ namespace SVM
                 return ReturnCodes.DEBUG_EXCEPTION;
             }
 #endif
-        }
+         }
     }
 }

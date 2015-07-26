@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,6 +83,10 @@ namespace SVM
 
     public static class ByteHelper
     {
+        /*
+         * TODO: find memory leaks. Not sure if pointer operations cause it.
+         */
+
         public static readonly byte[] HWORDONE = new byte[1] { 1 };
         public static readonly byte[] WORDONE  = new byte[2] { 1, 0 };
         public static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
@@ -238,8 +243,7 @@ namespace SVM
             if (size == Sizes.LWORD)     return LWORDONE;
             if (size == Sizes.DWORD)     return DWORDONE;
 
-            // TODO: implement the damn error handling system...
-            throw new InvalidOperationException("Invalid size");
+            return DWORDONE;
         }
     }
 }

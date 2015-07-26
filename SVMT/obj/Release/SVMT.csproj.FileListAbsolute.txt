@@ -1,7 +1,7 @@
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\bin\Release\SVMT.dll
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\bin\Release\SVMT.pdb
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\bin\Release\SVM.exe
-C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\bin\Release\SVM.pdb
-C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Release\SVMT.csprojResolveAssemblyReference.cache
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Release\SVMT.dll
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Release\SVMT.pdb
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\bin\Release\SVM.pdb
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Release\SVMT.csprojResolveAssemblyReference.cache

@@ -110,7 +110,7 @@ namespace SVM
 
             List<Opcode> codes = codesQuery.ToList();
 
-            Console.WriteLine("Checking that all codes are unique...");
+           Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
 
             for (int i = 0; i < codes.Count; i++)
             {
@@ -124,35 +124,35 @@ namespace SVM
                 codes.RemoveAt(i);
             }
 
-            Console.WriteLine("All codes are unique!");
-            Console.WriteLine("Total " + codesQuery.Count() + " codes were found");
+            Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
+            Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
 
             // Print all unused code slots.
 
-            Console.WriteLine("Free code slots are: ");
+            Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
 
             List<byte> byteCodes = codesQuery.Select(c => c.Code).ToList();
+            string buffer = string.Empty;
             int k = 0;
 
             for (byte i = 0; i < 255; i++)
             {
                 if (!byteCodes.Contains(i))
                 {
-                    k++;
-
-                    Console.Write(i);
-
-                    if (i + 1 < 255) Console.Write("\t ");
+                    buffer += i.ToString();
+                    if (i + 1 < 255) buffer += "\t ";
 
                     if (k >= 4)
                     {
-                        Console.WriteLine();
+                        Console.WriteLine(buffer);
+
+                        buffer = string.Empty;
                         k = 0;
                     }
                 }
             }
 
-            Console.WriteLine("\nTotal {0} free code slots", 255 - byteCodes.Count);
+            Console.WriteLine(MessageType.Info, string.Format("\nTotal {0} free code slots", 255 - byteCodes.Count));
         }
 #endif
         #endregion
