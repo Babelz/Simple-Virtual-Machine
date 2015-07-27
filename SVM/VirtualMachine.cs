@@ -162,7 +162,7 @@ namespace SVM
         public void Initialize()
         {
             memory.Clear();
-            caches.Clear();
+            caches.ClearCaches();
 
             // Stack pointer should start from register 
             // high address since registers live below this 
@@ -572,6 +572,9 @@ namespace SVM
                 ByteHelper.AddBytes(cache, ByteHelper.GetOneByteArray(size), rCache);
 
                 memory.WriteBytes(register, register + size, rCache);
+
+
+                Console.WriteLine(ByteHelper.ToInt(rCache));
             }
             else if (opcode == Opcodes.Inc_Stack.Code)
             {
@@ -598,7 +601,7 @@ namespace SVM
 
                 ByteHelper.SubtractBytes(cache, ByteHelper.GetOneByteArray(size), rCache);
 
-                memory.WriteBytes(register, register + size, cache);
+                memory.WriteBytes(register, register + size, rCache);
             }
             else if (opcode == Opcodes.Dec_Stack.Code)
             {

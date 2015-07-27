@@ -149,9 +149,14 @@ namespace SVM
         /// <summary>
         /// Clears all caches.
         /// </summary>
-        public void Clear()
+        public void ClearCaches()
         {
             for (int i = 0; i < transitionTable.Length; i++) transitionTable[i].Initialize();
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ClearCache(int size, int offset)
+        {
+            transitionTable[size + offset].Initialize();
         }
 
         /// <summary>

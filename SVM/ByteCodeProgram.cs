@@ -35,6 +35,8 @@ namespace SVM
 
             ByteHelper.ToBytes(value, buffer);
 
+            this.bytes.AddRange(buffer);
+
             return this;
         }
 

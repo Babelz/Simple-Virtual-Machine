@@ -190,6 +190,11 @@ namespace SVM
                     for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
                     for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
 
+                    if (lhs[0] == 255)
+                    {
+                        Console.WriteLine("ASDASDASD");
+                    }
+
                     int value = aIntCache[0] + bIntCache[0];
 
                     *(int*)resultPtr = value;
@@ -236,10 +241,13 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetOneByteArray(byte size)
         {
-            if (size == Sizes.HWORD)     return HWORDONE;
-            if (size == Sizes.WORD)      return WORDONE;
-            if (size == Sizes.LWORD)     return LWORDONE;
-            if (size == Sizes.DWORD)     return DWORDONE;
+            // TODO: fix this shit. ToArray should not be called.
+            //       reason for this is that some opcodes use this
+            //       method and they modify the reference.
+            if (size == Sizes.HWORD)     return HWORDONE.ToArray();
+            if (size == Sizes.WORD)      return WORDONE.ToArray();
+            if (size == Sizes.LWORD)     return LWORDONE.ToArray();
+            if (size == Sizes.DWORD)     return DWORDONE.ToArray();
 
             return DWORDONE;
         }

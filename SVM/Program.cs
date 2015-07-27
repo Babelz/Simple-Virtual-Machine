@@ -41,7 +41,7 @@ namespace SVM
             {
                 AddDirectStackPerformanceTest();
             }
-
+             
             Console.ReadKey();
         }
 

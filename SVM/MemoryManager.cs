@@ -118,7 +118,7 @@ namespace SVM
 
                 j++;
                 i++;
-            } while (i < highAddress - 1);
+            } while (i < highAddress);
         }
 
         /// <summary>
