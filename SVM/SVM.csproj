@@ -69,7 +69,7 @@
     <Compile Include="ArgumentRegister.cs" />
     <Compile Include="ByteCodeProgram.cs" />
     <Compile Include="ByteHelper.cs" />
-    <Compile Include="Caches.cs" />
+    <Compile Include="CacheManager.cs" />
     <Compile Include="FileHelper.cs" />
     <Compile Include="Opcodes.cs" />
     <Compile Include="Program.cs" />

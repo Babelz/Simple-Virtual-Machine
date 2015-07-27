@@ -9,43 +9,10 @@ using System.Threading.Tasks;
 namespace SVM
 {
     /// <summary>
-    /// Contains all opcodes supported by the virtual machine.
-    /// Opcodes that are supported are:
-    /// 
-    /// Stack opcodes
-    ///     1) push
-    ///         - direct
-    ///         - indirect
-    ///     2) pop
-    ///         - direct
-    ///         - indirect
-    ///     3) top
-    ///     4) sp
-    ///
-    /// Register opcodes
-    ///     1) load
-    ///     2) clear
-    ///     3) copystack
-    ///         - direct register
-    ///         - direct stack
-    ///     
-    /// Control flow
-    ///     1) abort 
-    ///     2) halt
-    ///     
-    /// Memory
-    ///     1) stackalloc
-    ///     2) zeromemory
-    ///     3) array
-    ///         - direct register
-    ///         - direct stack
-    ///     4) ptrstack
-    ///         - direct
-    ///         - indirect register
-    /// </summary>
-    public static class Opcodes
+    /// Contains all bytecodes supported by the virtual machine.
+    public static class Bytecodes
     {
-        // TODO: reorder opcodes by code...
+        // TODO: reorder bytecodes by value...
 
         /*
          * Stack operations.

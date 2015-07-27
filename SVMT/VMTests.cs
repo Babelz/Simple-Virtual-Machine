@@ -19,10 +19,10 @@ namespace SVMT
             // Add direct stack.
             ByteCodeProgram program1 = new ByteCodeProgram();
 
-            program1.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 8, 0);
-            program1.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 7, 0);
-            program1.AddBytes(Opcodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
-            program1.AddBytes(Opcodes.Top, Sizes.WORD, Registers.AA);
+            program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 8, 0);
+            program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 7, 0);
+            program1.AddBytes(Bytecodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
+            program1.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.AA);
 
             svm.Initialize();
             svm.RunProgram(program1);
@@ -44,10 +44,10 @@ namespace SVMT
 
                 // Add direct stack.
                 ByteCodeProgram program1 = new ByteCodeProgram();
-                program1.AddBytes(Opcodes.Load, Registers.AB, Sizes.LWORD, lbs1, 0, 0, 0);
-                program1.AddBytes(Opcodes.Load, Registers.BB, Sizes.LWORD, lbs2, 0, 0, 0);
-                program1.AddBytes(Opcodes.Add_IndirectRegister_Stack, Registers.AB, Registers.BB);
-                program1.AddBytes(Opcodes.Top, Sizes.LWORD, Registers.CB);
+                program1.AddBytes(Bytecodes.Load, Registers.AB, Sizes.LWORD, lbs1, 0, 0, 0);
+                program1.AddBytes(Bytecodes.Load, Registers.BB, Sizes.LWORD, lbs2, 0, 0, 0);
+                program1.AddBytes(Bytecodes.Add_IndirectRegister_Stack, Registers.AB, Registers.BB);
+                program1.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.CB);
 
                 svm.Initialize();
                 svm.RunProgram(program1);
@@ -63,13 +63,13 @@ namespace SVMT
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
-            program.AddBytes(Opcodes.Load, Registers.AA, Sizes.WORD, 1, 0);
-            program.AddBytes(Opcodes.Add_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.CA);
+            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Add_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.CA);
 
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Opcodes.Load, Registers.BA, Sizes.WORD, 1, 0);
-                program.AddBytes(Opcodes.Add_IndirectRegister_Register, Registers.AA, Registers.CA, Registers.CA);
+                program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
+                program.AddBytes(Bytecodes.Add_IndirectRegister_Register, Registers.AA, Registers.CA, Registers.CA);
             }
 
             svm.Initialize();
@@ -85,15 +85,15 @@ namespace SVMT
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
-            program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
 
             for (int i = 0; i < 10000; i++)
             {
-                program.AddBytes(Opcodes.Load, Registers.AA, Sizes.WORD, 1, 0);
-                program.AddBytes(Opcodes.Add_DirectStackRegister_Stack, Sizes.WORD, Registers.AA);
+                program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
+                program.AddBytes(Bytecodes.Add_DirectStackRegister_Stack, Sizes.WORD, Registers.AA);
             }
 
-            program.AddBytes(Opcodes.Top, Sizes.WORD, Registers.BA);
+            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);
 
             svm.Initialize();
             svm.RunProgram(program);
@@ -108,12 +108,12 @@ namespace SVMT
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
-            program.AddBytes(Opcodes.Load, Registers.BA, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
 
             for (int i = 0; i < 10000; i++)
             {
-                program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
-                program.AddBytes(Opcodes.Add_DirectStackRegister_Register, Sizes.WORD, Registers.BA, Registers.BA);
+                program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
+                program.AddBytes(Bytecodes.Add_DirectStackRegister_Register, Sizes.WORD, Registers.BA, Registers.BA);
             }
 
             svm.Initialize();
@@ -131,7 +131,7 @@ namespace SVMT
             
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Opcodes.Inc_Reg, Registers.AA);
+                program.AddBytes(Bytecodes.Inc_Reg, Registers.AA);
             }
 
             svm.Initialize();
@@ -145,12 +145,12 @@ namespace SVMT
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
-            program.AddBytes(Opcodes.Load, Registers.AA, Sizes.WORD).AddValue(1000, Sizes.WORD);
-            program.AddBytes(Opcodes.Load, Registers.AB, Sizes.WORD).AddValue(1000, Sizes.WORD);
+            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD).AddValue(1000, Sizes.WORD);
+            program.AddBytes(Bytecodes.Load, Registers.AB, Sizes.WORD).AddValue(1000, Sizes.WORD);
            
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Opcodes.Dec_Reg, Registers.AA);
+                program.AddBytes(Bytecodes.Dec_Reg, Registers.AA);
             }
 
             svm.Initialize();
@@ -165,14 +165,14 @@ namespace SVMT
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
-            program.AddBytes(Opcodes.Push_Direct, Sizes.WORD).AddValue(0, Sizes.WORD);
+            program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(0, Sizes.WORD);
 
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Opcodes.Inc_Stack, Sizes.WORD);
+                program.AddBytes(Bytecodes.Inc_Stack, Sizes.WORD);
             }
 
-            program.AddBytes(Opcodes.CopyStack_Direct, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
+            program.AddBytes(Bytecodes.CopyStack_Direct, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
 
             svm.Initialize();
             svm.RunProgram(program);

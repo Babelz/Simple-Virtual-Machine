@@ -27,15 +27,15 @@ namespace SVM
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
             Process.GetCurrentProcess().PriorityBoostEnabled = true;
 
-            program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
 
             for (int i = 0; i < 1000000; i++)
             {
-                program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
-                program.AddBytes(Opcodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
+                program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
+                program.AddBytes(Bytecodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
             }
 
-            program.AddBytes(Opcodes.Top, Sizes.WORD, Registers.BA);
+            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);
 
             for (int i = 0; i < int.MaxValue; i++)
             {

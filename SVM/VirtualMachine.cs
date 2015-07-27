@@ -178,7 +178,7 @@ namespace SVM
         private bool InterpretOpcode(byte opcode)
         {
             // Interpret next opcode and return.
-            if (opcode == Opcodes.Push_Direct)
+            if (opcode == Bytecodes.Push_Direct)
             {
                 // Get size of the variable in bytes.
                 byte size = NextProgramByte();
@@ -194,7 +194,7 @@ namespace SVM
 
                 MoveStackPointer(size);
             }
-            else if (opcode == Opcodes.Push_Register)
+            else if (opcode == Bytecodes.Push_Register)
             {
                 // Read register address and get its size.
                 byte register = NextProgramByte();
@@ -216,7 +216,7 @@ namespace SVM
 
                 MoveStackPointer(registerCapacity);
             }
-            else if (opcode == Opcodes.Pop)
+            else if (opcode == Bytecodes.Pop)
             {
                 Debug.Assert(sp > Registers.HighAddress);
 
@@ -226,7 +226,7 @@ namespace SVM
                 // Everything after this address is trash.
                 MoveStackPointer(-(bytes + 1));
             }
-            else if (opcode == Opcodes.Top)
+            else if (opcode == Bytecodes.Top)
             {
                 byte size = NextProgramByte();
                 byte register = NextProgramByte();
@@ -243,7 +243,7 @@ namespace SVM
                 // Copy top of the stack to given register.
                 memory.WriteBytes(register, register + size, cache);
             }
-            else if (opcode == Opcodes.Sp)
+            else if (opcode == Bytecodes.Sp)
             {
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterSize(register);
@@ -257,7 +257,7 @@ namespace SVM
 
                 memory.WriteBytes(register, register + 4, cache);
             }
-            else if (opcode == Opcodes.Abort)
+            else if (opcode == Bytecodes.Abort)
             {
                 Console.WriteLine("Abort has been called");
                 
@@ -268,7 +268,7 @@ namespace SVM
 
                 return false;
             }
-            else if (opcode == Opcodes.StackAlloc)
+            else if (opcode == Bytecodes.StackAlloc)
             {
                 byte size = NextProgramByte();
                 byte[] bytes = NextProgramBytes(size, 0);
@@ -277,7 +277,7 @@ namespace SVM
 
                 memory.Reserve(bytesToAlloc, sp);
             }
-            else if (opcode == Opcodes.ZeroMemory)
+            else if (opcode == Bytecodes.ZeroMemory)
             {
                 byte size = NextProgramByte();
                 byte[] bytes = NextProgramBytes(size, 0);
@@ -286,7 +286,7 @@ namespace SVM
 
                 memory.Clear(sp - bytesToClear, sp);
             }
-            else if (opcode == Opcodes.Load)
+            else if (opcode == Bytecodes.Load)
             {
                 byte register = NextProgramByte();
                 byte size = NextProgramByte();
@@ -298,14 +298,14 @@ namespace SVM
 
                 memory.WriteBytes(register, register + size, bytes);
             }
-            else if (opcode == Opcodes.Clear)
+            else if (opcode == Bytecodes.Clear)
             {
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterSize(register);
 
                 memory.Clear(register, register + registerCapacity);
             }
-            else if (opcode == Opcodes.CopyStack_Direct)
+            else if (opcode == Bytecodes.CopyStack_Direct)
             {
                 byte register = NextProgramByte();
                 byte valueSize = NextProgramByte();
@@ -328,7 +328,7 @@ namespace SVM
                 // Copy value from the stack to given register.
                 memory.WriteBytes(register, register + registerCapacity, cache);
             }
-            else if (opcode == Opcodes.CopyStack_IndirectRegister)
+            else if (opcode == Bytecodes.CopyStack_IndirectRegister)
             {
                 byte size = NextProgramByte();
                 byte addressRegister = NextProgramByte();
@@ -352,7 +352,7 @@ namespace SVM
                 memory.ReadBytes(sp - size, sp, valueBytes);
                 memory.WriteBytes(targetRegister, targetRegister + targetRegisterCapacity, valueBytes);
             }
-            else if (opcode == Opcodes.PtrStack)
+            else if (opcode == Bytecodes.PtrStack)
             {
                 // ptrstack [address_size] [address] [value_size] [value]
                 byte addressSize = NextProgramByte();
@@ -368,7 +368,7 @@ namespace SVM
 
                 memory.WriteBytes(address, address + addressBytes.Length, valueBytes);
             }
-            else if (opcode == Opcodes.PtrStack_IndirectRegister)
+            else if (opcode == Bytecodes.PtrStack_IndirectRegister)
             {
                 byte register = NextProgramByte();
                 byte size = NextProgramByte();
@@ -388,7 +388,7 @@ namespace SVM
 
                 memory.WriteBytes(address, address + bytes.Length, cache);
             }
-            else if (opcode == Opcodes.GenerateArray_IndirectRegister)
+            else if (opcode == Bytecodes.GenerateArray_IndirectRegister)
             {
                 byte lowAddressRegister = NextProgramByte();
                 byte highAddressRegister = NextProgramByte();
@@ -416,7 +416,7 @@ namespace SVM
 
                 MoveStackPointer(totalBytes);
             }
-            else if (opcode == Opcodes.GenerateArray_IndirectStack)
+            else if (opcode == Bytecodes.GenerateArray_IndirectStack)
             {
                 byte elementsCountRegister = NextProgramByte();
                 byte elementSize = NextProgramByte();
@@ -446,7 +446,7 @@ namespace SVM
                 memory.WriteBytes(sp, sp + 4, cache);
                 MoveStackPointer(4);
             }
-            else if (opcode == Opcodes.Add_DirectStack)
+            else if (opcode == Bytecodes.Add_DirectStack)
             {
                 byte aSize = NextProgramByte();
                 byte bSize = NextProgramByte();
@@ -467,7 +467,7 @@ namespace SVM
 
                 MoveStackPointer(aSize);
             }
-            else if (opcode == Opcodes.Add_IndirectRegister_Stack)
+            else if (opcode == Bytecodes.Add_IndirectRegister_Stack)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
@@ -489,7 +489,7 @@ namespace SVM
 
                 MoveStackPointer(aRegisterCapacity);
             }
-            else if (opcode == Opcodes.Add_IndirectRegister_Register)
+            else if (opcode == Bytecodes.Add_IndirectRegister_Register)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
@@ -514,7 +514,7 @@ namespace SVM
 
                 memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
             }
-            else if (opcode == Opcodes.Add_DirectStackRegister_Stack)
+            else if (opcode == Bytecodes.Add_DirectStackRegister_Stack)
             {
                 byte size = NextProgramByte();
                 byte register = NextProgramByte();
@@ -538,7 +538,7 @@ namespace SVM
 
                 MoveStackPointer(size);
             }
-            else if (opcode == Opcodes.Add_DirectStackRegister_Register)
+            else if (opcode == Bytecodes.Add_DirectStackRegister_Register)
             {
                 // Get the size.
                 byte size = program[pc + 1];
@@ -547,7 +547,7 @@ namespace SVM
                 // Dirty hack optimizations?
                 // TODO: see if some of the add variants can be
                 //       done the same way.
-                opcode = Opcodes.Add_DirectStackRegister_Stack;
+                opcode = Bytecodes.Add_DirectStackRegister_Stack;
                 InterpretOpcode(opcode);
 
                 // Copy the result to given cache.
@@ -564,7 +564,7 @@ namespace SVM
                 // Before this, we are pointing to this opcodes last argument.
                 MoveProgramCounter(1);
             }
-            else if (opcode == Opcodes.Inc_Reg)
+            else if (opcode == Bytecodes.Inc_Reg)
             {
                 byte register = NextProgramByte();
                 byte size = Registers.RegisterSize(register);
@@ -581,7 +581,7 @@ namespace SVM
 
                 Console.WriteLine(ByteHelper.ToInt(rCache));
             }
-            else if (opcode == Opcodes.Inc_Stack)
+            else if (opcode == Bytecodes.Inc_Stack)
             {
                 byte size = NextProgramByte();
 
@@ -594,7 +594,7 @@ namespace SVM
 
                 memory.WriteBytes(sp - size, sp, rCache);
             }
-            else if (opcode == Opcodes.Dec_Reg)
+            else if (opcode == Bytecodes.Dec_Reg)
             {
                 byte register = NextProgramByte();
                 byte size = Registers.RegisterSize(register);
@@ -608,7 +608,7 @@ namespace SVM
 
                 memory.WriteBytes(register, register + size, rCache);
             }
-            else if (opcode == Opcodes.Dec_Stack)
+            else if (opcode == Bytecodes.Dec_Stack)
             {
                 byte size = NextProgramByte();
 
@@ -621,7 +621,7 @@ namespace SVM
 
                 memory.WriteBytes(sp - size, sp, rCache);
             }
-            else if (opcode == Opcodes.Halt)
+            else if (opcode == Bytecodes.Halt)
             {
                 Console.WriteLine("Halt was called");
             }
