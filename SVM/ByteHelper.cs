@@ -265,8 +265,7 @@ namespace SVM
                 DWORDONE[1] = 0;
                 DWORDONE[2] = 0;
                 DWORDONE[3] = 0;
-                DWORDONE[4] = 0;
-
+                
                 return LWORDONE;
             }
             else if (size == Sizes.DWORD)
