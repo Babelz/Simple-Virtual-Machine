@@ -42,7 +42,7 @@ namespace SVM
         /// <summary>
         /// Cache memory.
         /// </summary>
-        private readonly Caches caches;
+        private readonly CacheManager caches;
 
         /// <summary>
         /// Stack pointer.
@@ -93,7 +93,7 @@ namespace SVM
             
             // 8Kb should be enough for the cache
             // at this time.
-            caches = new Caches(Sizes.CHUNK_8KB);
+            caches = new CacheManager(Sizes.CHUNK_8KB);
         }
 
         #region Private members
@@ -503,7 +503,7 @@ namespace SVM
                 // not be in use at this point.
                 byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
                 byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
-                byte[] rCache = caches.GetCache(Caches.M_CACHE);
+                byte[] rCache = caches.GetCache(CacheManager.M_CACHE);
 
                 // Copy data to caches.
                 memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);

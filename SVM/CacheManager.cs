@@ -24,7 +24,7 @@ namespace SVM
     /// any opcode that needs to work with memory. Don't call new,
     /// use us.
     /// </summary>
-    public sealed class Caches
+    public sealed class CacheManager
     {
         #region Constants
         /// <summary>
@@ -106,7 +106,7 @@ namespace SVM
         }
         #endregion
 
-        public Caches(int initialChunkSize)
+        public CacheManager(int initialChunkSize)
         {
             aCache = new byte[1];
             aaCache = new byte[1];
