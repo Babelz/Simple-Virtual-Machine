@@ -46,49 +46,49 @@ namespace SVM
          */
 
         /// <summary>
-        /// 8 000.
+        /// 8192.
         /// </summary>
-        public const int CHUNK_8KB = 8000;
+        public const int CHUNK_8KB = 8192;
 
         /// <summary>
-        /// 16 000.
+        /// 16 384.
         /// </summary>
-        public const int CHUNK_16KB = 16000;
+        public const int CHUNK_16KB = 16384;
 
         /// <summary>
-        /// 32 000.
+        /// 32 768.
         /// </summary>
-        public const int CHUNK_32KB = 32000;
+        public const int CHUNK_32KB = 32768;
 
         /// <summary>
-        /// 64 000
+        /// 65 536
         /// </summary>
-        public const int CHUNK_64KB = 64000;
+        public const int CHUNK_64KB = 65536;
 
         /// <summary>
-        /// 128 000
+        /// 131 072
         /// </summary>
-        public const int CHUNK_128KB = 128000;
+        public const int CHUNK_128KB = 131072;
 
         /// <summary>
-        /// 256 000
+        /// 262 144
         /// </summary>
-        public const int CHUNK_256KB = 256000;
+        public const int CHUNK_256KB = 262144;
         
         /// <summary>
-        /// 512 000
+        /// 524 288
         /// </summary>
-        public const int CHUNK_512KB = 512000;
+        public const int CHUNK_512KB = 524288;
 
         /// <summary>
-        /// 1 024 000
+        /// 1 048 576
         /// </summary>
-        public const int CHUNK_1024KB = 1024000;
+        public const int CHUNK_1024KB = 1048576;
 
         /// <summary>
-        /// 2 048 000
+        /// 2 097 152
         /// </summary>
-        public const int CHUNK_2048KB = 2048000;
+        public const int CHUNK_2048KB = 2097152;
 
         public static byte ToByte(string size)
         {

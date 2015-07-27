@@ -28,3 +28,15 @@ conversions need the same facelift as well.
 All byte helper functions have been reimplemented. Performance increases vary from function, but 
 on average the gains are huge. Addition gained 25x more speed at second implementation, and when comparing
 the third one to the first one, gains are around 50-70x.
+
+27.7.2014
+
+1:03
+
+Naming conventions inside the opcodes
+
+size/...Size			- bytes count
+register/...Register	- register low address
+registerCapacity		- register size in bytes
+bytes/...Bytes			- some byte values
+cache					- temp array of bytes

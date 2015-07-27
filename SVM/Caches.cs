@@ -35,33 +35,33 @@ namespace SVM
         /// <summary>
         /// Static 1-byte cache.
         /// </summary>
-        public const byte B_CACHE = 1;
+        public const byte B_CACHE = 2;
 
         /// <summary>
         /// Static 2-byte cache.
         /// </summary>
-        public const byte C_CACHE = 2;
+        public const byte C_CACHE = 4;
 
         /// <summary>
         /// Static 2-byte cache.
         /// </summary>
-        public const byte D_CACHE = 3;
+        public const byte D_CACHE = 6;
 
         /// <summary>
         /// Static 4-byte cache.
         /// </summary>
-        public const byte E_CACHE = 4;
+        public const byte E_CACHE = 8;
 
         /// <summary>
         /// Static 4-byte cache.
         /// </summary>
-        public const byte F_CACHE = 5;
+        public const byte F_CACHE = 10;
 
         /// <summary>
         /// Address of the main cache. This 
         /// cache is dynamic.
         /// </summary>
-        public const byte M_CACHE = 6;
+        public const byte M_CACHE = 12;
         #endregion
 
         #region Fields
@@ -71,15 +71,21 @@ namespace SVM
 
         // 1-byte caches.
         private readonly byte[] aCache;
+        private readonly byte[] aaCache;
         private readonly byte[] bCache;
+        private readonly byte[] bbCache;
 
         // 2-byte caches.
         private readonly byte[] cCache;
+        private readonly byte[] ccCache;
         private readonly byte[] dCache;
+        private readonly byte[] ddCache;
 
         // 4-byte caches.
         private readonly byte[] eCache;
+        private readonly byte[] eeCache;
         private readonly byte[] fCache;
+        private readonly byte[] ffCache;
 
         /// <summary>
         /// Main, dynamic cache chunk.
@@ -103,26 +109,38 @@ namespace SVM
         public Caches(int initialChunkSize)
         {
             aCache = new byte[1];
+            aaCache = new byte[1];
             bCache = new byte[1];
+            bbCache = new byte[1];
 
             cCache = new byte[2];
+            ccCache = new byte[2];
             dCache = new byte[2];
+            ddCache = new byte[2];
 
             eCache = new byte[4];
+            eeCache = new byte[4];
             fCache = new byte[4];
+            ffCache = new byte[4];
 
             mCache = new byte[initialChunkSize];
 
-            transitionTable = new byte[7][]
+            transitionTable = new byte[13][]
             {
                 aCache,
+                aaCache,
                 bCache,
+                bbCache,
                 
                 cCache,
+                ccCache,
                 dCache,
+                ddCache,
                 
                 eCache,
+                eeCache,
                 fCache,
+                ffCache,
 
                 mCache
             };
@@ -159,9 +177,9 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] GetCacheOfSize(int size, int offset)
         {
-            if (size == 1)       return transitionTable[0 + offset];
-            else if (size == 2)  return transitionTable[2 + offset];
-            else if (size == 4)  return transitionTable[4 + offset];
+            if      (size == 1)  return transitionTable[0 + offset];
+            else if (size == 2)  return transitionTable[4 + offset];
+            else if (size == 4)  return transitionTable[8 + offset];
             else                 return transitionTable[M_CACHE];
          }
     }

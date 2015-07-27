@@ -15,12 +15,12 @@ namespace SVM
         /// <summary>
         /// Low address of registers.
         /// </summary>
-        public static readonly byte RegistersLowAddress = 0;
+        public static readonly byte LowAddress = 0;
         
         /// <summary>
         /// High address of registers. 
         /// </summary>
-        public static readonly byte RegisterHighAddress = 62;
+        public static readonly byte HighAddress = 62;
 
         /*
          * 8-bit registers.

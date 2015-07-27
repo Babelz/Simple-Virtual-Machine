@@ -110,7 +110,7 @@ namespace SVM
 
             List<Opcode> codes = codesQuery.ToList();
 
-           Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
+            Console.WriteLine("Checking that all codes are unique...");
 
             for (int i = 0; i < codes.Count; i++)
             {
@@ -123,13 +123,6 @@ namespace SVM
 
                 codes.RemoveAt(i);
             }
-
-            Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
-            Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
-
-            // Print all unused code slots.
-
-            Console.WriteLine(MessageType.Info, "Checking that all codes are unique...");
 
             List<byte> byteCodes = codesQuery.Select(c => c.Code).ToList();
             string buffer = string.Empty;
@@ -149,10 +142,12 @@ namespace SVM
                         buffer = string.Empty;
                         k = 0;
                     }
+
+                    k++;
                 }
             }
 
-            Console.WriteLine(MessageType.Info, string.Format("\nTotal {0} free code slots", 255 - byteCodes.Count));
+            Console.WriteLine(string.Format("\nTotal {0} free code slots", 255 - byteCodes.Count));
         }
 #endif
         #endregion
@@ -286,14 +281,14 @@ namespace SVM
         /// <summary>
         /// Sets given value at given location on the stack
         /// 
-        /// setstack [address_size] [address] [value_size] [value]
+        /// ptrstack [address_size] [address] [value_size] [value]
         /// </summary>
         public static readonly Opcode PtrStack = new Opcode(0x0037, 3, AddressingMode.Direct);
 
         /// <summary>
         /// Sets given value at given location on the stack
         /// 
-        /// setstack [address_register] [size] [value]
+        /// ptrstack [address_register] [size] [value]
         /// </summary>
         public static readonly Opcode PtrStack_IndirectRegister = new Opcode(0x0047, 3, AddressingMode.IndirectRegister);
 

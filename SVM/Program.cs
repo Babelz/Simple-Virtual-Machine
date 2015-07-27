@@ -16,6 +16,7 @@ namespace SVM
     {
         static VirtualMachine svm = new VirtualMachine(); 
         static ByteCodeProgram program = new ByteCodeProgram();
+        static Stopwatch sw = new Stopwatch();
 
         private static void StartLoggerThread()
         {
@@ -23,11 +24,12 @@ namespace SVM
 
         static void Main(string[] args)
         {
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
             Process.GetCurrentProcess().PriorityBoostEnabled = true;
 
             program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
 
-            /*for (int i = 0; i < 5000000; i++)
+            for (int i = 0; i < 1000000; i++)
             {
                 program.AddBytes(Opcodes.Push_Direct, Sizes.WORD, 1, 0);
                 program.AddBytes(Opcodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
@@ -38,60 +40,7 @@ namespace SVM
             for (int i = 0; i < int.MaxValue; i++)
             {
                 AddDirectStackPerformanceTest();
-            }*/
-
-            long at = 0;
-            long bt = 0;
-
-            int times = 10;
-
-            for (int j = 0; j < times; j++)
-            {
-
-                int chunks = 32;
-
-                MemoryManager b = new MemoryManager(Sizes.CHUNK_2048KB * chunks);
-                
-                byte[] buffer = new byte[Sizes.CHUNK_2048KB * 128];
-                
-                int block = 8;
-                
-                var sw = Stopwatch.StartNew();
-               
-
-                for (int i = 0; i < b.HighAddress; i += block)
-                {
-                    b.ReadBytes(i, i + block, buffer);
-                }
-
-                sw.Stop();
-
-                Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds);
-                bt += sw.ElapsedMilliseconds;
-
-                Console.WriteLine();
             }
-
-            Console.WriteLine("A avg: " + at / times);
-            Console.WriteLine("B avg: " + bt / times);
-
-            long atv = at / times;
-            long btv = bt / times;
-
-            long max = Math.Max(atv, btv);
-            long min = Math.Min(atv, btv);
-
-            long maxPercent = max / 100;
-
-            long percents = 0;
-            long total = 0;
-            while (max - total > min)
-            {
-                percents++;
-                total += maxPercent;
-            }
-
-            Console.WriteLine("Diff: " + percents + "%");
 
             Console.ReadKey();
         }
@@ -100,21 +49,20 @@ namespace SVM
         {
             svm.Initialize();
 
-            Stopwatch sw = new Stopwatch();
+            sw.Reset();
 
-            //Console.WriteLine("Begin...");
+            Console.WriteLine("Begin...");
+            
             sw.Start();
 
             svm.RunProgram(program);
 
             sw.Stop();
-            Console.WriteLine("End...");
 
+            Console.WriteLine("End...");
             Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds);
             Console.WriteLine("BA: " + svm.ReadRegisterValue(Registers.BA));
-
-            /*svm.DumpStack();
-            svm.DumpRegisters();*/
+            Console.WriteLine();
         }
     }
 }

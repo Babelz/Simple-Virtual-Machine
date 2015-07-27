@@ -86,6 +86,11 @@ namespace SVM
         /*
          * TODO: find memory leaks. Not sure if pointer operations cause it.
          */
+        #region Static caches
+        // Temp, stateless variables used with functions.
+        private static readonly int[] aIntCache = new int[1];
+        private static readonly int[] bIntCache = new int[1];
+        #endregion
 
         public static readonly byte[] HWORDONE = new byte[1] { 1 };
         public static readonly byte[] WORDONE  = new byte[2] { 1, 0 };
@@ -101,16 +106,16 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static int ToInt(params byte[] bytes)
         {
-            int[] result = new int[1];
+            aIntCache[0] = 0;
 
-            fixed (int* resultPtr = result)
+            fixed (int* resultPtr = aIntCache)
             {
                 byte* resultValPtr = (byte*)resultPtr;
 
                 for (int i = 0; i < bytes.Length; i++) resultValPtr[i] = bytes[i];
             }
 
-            return result[0];
+            return aIntCache[0];
         }
 
         /// <summary>
@@ -121,16 +126,12 @@ namespace SVM
         /// <param name="bytes">bytes to convert</param>
         /// <returns>converted bytes</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static byte[] ToBytes(int value, int bytes)
+        public unsafe static void ToBytes(int value, byte[] bytes)
         {
-            byte[] result = new byte[bytes];
-
-            fixed (byte* resultPtr = result)
+            fixed (byte* resultPtr = bytes)
             {
                 *(int*)resultPtr = value;
             }
-
-            return result;
         }
 
         /// <summary>
@@ -144,13 +145,13 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static int AddInt(byte[] lhs, byte[] rhs)
         {
+            aIntCache[0] = 0;
+            bIntCache[0] = 0;
+
             int result = 0;
 
-            int[] lhsResult = new int[1];
-            int[] rhsResult = new int[1];
-
-            fixed (int* lhsResultPtr = lhsResult)
-            fixed (int* rhsResultPtr = rhsResult)
+            fixed (int* lhsResultPtr = aIntCache)
+            fixed (int* rhsResultPtr = bIntCache)
             {
                 byte* lhsValPtr = (byte*)lhsResultPtr;
                 byte* rhsValPtr = (byte*)rhsResultPtr;
@@ -158,7 +159,7 @@ namespace SVM
                 for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
                 for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
 
-                result = lhsResult[0] + rhsResult[0];
+                result = aIntCache[0] + bIntCache[0];
             }
 
             return result;
@@ -173,54 +174,51 @@ namespace SVM
         /// <param name="rhs">right hand side bytes</param>
         /// <returns>lhs + rhs</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static byte[] AddBytes(byte[] lhs, byte[] rhs)
+        public unsafe static void AddBytes(byte[] lhs, byte[] rhs, byte[] bytes)
         {
-            byte[] result = new byte[lhs.Length];
-            int[] lhsResult = new int[1];
-            int[] rhsResult = new int[1];
+            aIntCache[0] = 0;
+            bIntCache[0] = 0;
 
-            fixed (byte* resultPtr = result)
+            fixed (byte* resultPtr = bytes)
             {
-                fixed (int* lhsPtr = lhsResult)
-                fixed (int* rhsPtr = rhsResult)
+                fixed (int* lhsPtr = aIntCache)
+                fixed (int* rhsPtr = bIntCache)
                 {
                     byte* lhsValPtr = (byte*)lhsPtr;
                     byte* rhsValPtr = (byte*)rhsPtr;
 
-                    for (int i = 0; i < rhs.Length; i++) lhsValPtr[i] = rhs[i];
-                    for (int i = 0; i < lhs.Length; i++) rhsValPtr[i] = lhs[i];
+                    for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
+                    for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
 
-                    int value = lhsResult[0] + rhsResult[0];
+                    int value = aIntCache[0] + bIntCache[0];
 
                     *(int*)resultPtr = value;
                 }
             }
-
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SubtractInt(byte[] lhs, byte[] rhs)
         {
-            rhs = ByteHelper.Negate(rhs);
+            ByteHelper.Negate(rhs);
 
             return ByteHelper.AddInt(lhs, rhs);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte[] SubtractBytes(byte[] lhs, byte[] rhs)
+        public static void SubtractBytes(byte[] lhs, byte[] rhs, byte[] bytes)
         {
-            rhs = ByteHelper.Negate(rhs);
+            ByteHelper.Negate(rhs);
 
-            return ByteHelper.AddBytes(lhs, rhs);
+            ByteHelper.AddBytes(lhs, rhs, bytes);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte[] Negate(byte[] bytes)
+        public static void Negate(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i++) bytes[i] = (byte)~bytes[i];
 
-            return ByteHelper.AddBytes(bytes, ByteHelper.GetOneByteArray((byte)bytes.Length));
+            ByteHelper.AddBytes(bytes, ByteHelper.GetOneByteArray((byte)bytes.Length), bytes);
         }
 
         public static string ToBinaryString(byte[] bytes)

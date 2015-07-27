@@ -31,7 +31,9 @@ namespace SVM
         }
         public ByteCodeProgram AddValue(int value, int bytes)
         {
-            this.bytes.AddRange(ByteHelper.ToBytes(value, bytes));
+            byte[] buffer = new byte[bytes];
+
+            ByteHelper.ToBytes(value, buffer);
 
             return this;
         }

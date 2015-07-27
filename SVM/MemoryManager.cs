@@ -58,7 +58,6 @@ namespace SVM
             Array.Resize(ref chunk, bytes);
         }
 
-
         /// <summary>
         /// Insert given byte to given memory location.
         /// </summary>
@@ -79,12 +78,16 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBytes(int lowAddress, int highAddress, byte[] buffer)
         {
+            int i = lowAddress;
             int j = 0;
-            for (int i = lowAddress; i < highAddress; i++)
+
+            do 
             {
                 chunk[i] = buffer[j];
+                
+                i++;
                 j++;
-            }
+            } while (i < highAddress);
         }
         
         /// <summary>
@@ -106,7 +109,16 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ReadBytes(int lowAddress, int highAddress, byte[] buffer)
         {
-            Array.Copy(chunk, lowAddress, buffer, 0, highAddress - lowAddress);
+            int i = lowAddress;
+            int j = 0;
+
+            do
+            {
+                buffer[j] = chunk[i];
+
+                j++;
+                i++;
+            } while (i < highAddress - 1);
         }
 
         /// <summary>

@@ -13,7 +13,8 @@ namespace SVMT
         {
             for (int i = 0; i < 100000; i++)
             {
-                byte[] bytes = ByteHelper.ToBytes(i, 4);
+                byte[] bytes = new byte[4];
+                ByteHelper.ToBytes(i, bytes);
 
                 int number = ByteHelper.ToInt(bytes);
 
@@ -24,13 +25,13 @@ namespace SVMT
         [TestMethod]
         public void AddInt32Tests()
         {
-            byte[] lhs = null;
-            byte[] rhs = null;
+            byte[] lhs = new byte[4];
+            byte[] rhs = new byte[4];
 
             for (int i = 0; i < 100000; i++)
             {
-                lhs = ByteHelper.ToBytes(i * 2, 4);
-                rhs = ByteHelper.ToBytes(i * 4, 4);
+                ByteHelper.ToBytes(i * 2, lhs);
+                ByteHelper.ToBytes(i * 4, rhs);
 
                 int result = ByteHelper.AddInt(lhs, rhs);
 
@@ -41,13 +42,13 @@ namespace SVMT
         [TestMethod]
         public void SubtractInt32Tests()
         {
-            byte[] lhs = null;
-            byte[] rhs = null;
+            byte[] lhs = new byte[4];
+            byte[] rhs = new byte[4];
 
             for (int i = 0; i < 100000; i++)
             {
-                lhs = ByteHelper.ToBytes(i * 2, 4);
-                rhs = ByteHelper.ToBytes(i, 4);
+                ByteHelper.ToBytes(i * 2, lhs);
+                ByteHelper.ToBytes(i, rhs);
 
                 int result = ByteHelper.SubtractInt(lhs, rhs);
 
@@ -58,9 +59,11 @@ namespace SVMT
         [TestMethod]
         public void ToIntTests()
         {
+            byte[] bytes = new byte[4];
+
             for (int i = 0; i < 100000; i++)
             {
-                byte[] bytes = ByteHelper.ToBytes(i, 4);
+                ByteHelper.ToBytes(i, bytes);
 
                 int value = ByteHelper.ToInt(bytes);
 
@@ -71,17 +74,18 @@ namespace SVMT
         [TestMethod]
         public void AddBytesTests()
         {
-            byte[] lhs = null;
-            byte[] rhs = null;
-            byte[] real = null;
+            byte[] lhs = new byte[4];
+            byte[] rhs = new byte[4];
+            byte[] real = new byte[4];
+            byte[] result = new byte[4];
 
             for (int i = 0; i < 100000; i++)
             {
-                lhs = ByteHelper.ToBytes(i, 4);
-                rhs = ByteHelper.ToBytes(i, 4);
-                real = ByteHelper.ToBytes(i * 2, 4);
+                ByteHelper.ToBytes(i, lhs);
+                ByteHelper.ToBytes(i, rhs);
+                ByteHelper.ToBytes(i * 2, real);
 
-                byte[] result = ByteHelper.AddBytes(lhs, rhs);
+                ByteHelper.AddBytes(lhs, rhs, result);
 
                 for (int j = 0; j < result.Length; j++)
                 {
@@ -93,15 +97,16 @@ namespace SVMT
         [TestMethod]
         public void SubtractBytesTests()
         {
-            byte[] lhs = null;
-            byte[] rhs = null;
+            byte[] lhs = new byte[4];
+            byte[] rhs = new byte[4];
+            byte[] bytes = new byte[4];
 
             for (int i = 0; i < 100000; i++)
             {
-                lhs = ByteHelper.ToBytes(i * 2, 4);
-                rhs = ByteHelper.ToBytes(i, 4);
+                ByteHelper.ToBytes(i * 2, lhs);
+                ByteHelper.ToBytes(i, rhs);
 
-                byte[] bytes = ByteHelper.SubtractBytes(lhs, rhs);
+                ByteHelper.SubtractBytes(lhs, rhs, bytes);
 
                 int result = ByteHelper.ToInt(bytes);
 
