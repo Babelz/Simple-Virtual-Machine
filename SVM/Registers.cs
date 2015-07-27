@@ -15,50 +15,50 @@ namespace SVM
         /// <summary>
         /// Low address of registers.
         /// </summary>
-        public static readonly byte LowAddress = 0;
+        public const byte LowAddress = 0;
         
         /// <summary>
         /// High address of registers. 
         /// </summary>
-        public static readonly byte HighAddress = 62;
+        public const byte HighAddress = 62;
 
         /*
          * 8-bit registers.
          */
-        public static readonly byte A = 0;
-        public static readonly byte B = 1;
-        public static readonly byte C = 2;
-        public static readonly byte D = 3;
+        public const byte A = 0;
+        public const byte B = 1;
+        public const byte C = 2;
+        public const byte D = 3;
 
         /* 
          * 16-bit registers.
          */
-        public static readonly byte AA = 4;
-        public static readonly byte BA = 6;
-        public static readonly byte CA = 8;
-        public static readonly byte DA = 10;
+        public const byte AA = 4;
+        public const byte BA = 6;
+        public const byte CA = 8;
+        public const byte DA = 10;
 
         /*
          * 32-bit registers.
          */
-        public static readonly byte AB = 12;
-        public static readonly byte BB = 16;
-        public static readonly byte CB = 20;
-        public static readonly byte DB = 24;
+        public const byte AB = 12;
+        public const byte BB = 16;
+        public const byte CB = 20;
+        public const byte DB = 24;
 
         /*
          * 64-bit registers.
          */
-        public static readonly byte AC = 28;
-        public static readonly byte BC = 36;
-        public static readonly byte CC = 44;
-        public static readonly byte DC = 52;
+        public const byte AC = 28;
+        public const byte BC = 36;
+        public const byte CC = 44;
+        public const byte DC = 52;
 
         /// <summary>
         /// Low address of the flags register.
         /// 16-bit register.
         /// </summary>
-        public static readonly byte FLAGS = 60;
+        public const byte FLAGS = 60;
 
         /// <summary>
         /// Returns the size of given register in bytes.

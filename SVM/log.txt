@@ -39,4 +39,9 @@ size/...Size			- bytes count
 register/...Register	- register low address
 registerCapacity		- register size in bytes
 bytes/...Bytes			- some byte values
-cache					- temp array of bytes
+cache/...Cache		    - temp array of bytes
+
+4:48
+
+Optimized memory usage and removed alot of allocations to the .net stack. Created new caching system
+that allows easy reuse of byte arrays.

@@ -21,17 +21,17 @@ namespace SVM
         /// <summary>
         /// 8-bit word.
         /// </summary>
-        public static readonly byte HWORD = 1;
+        public const byte HWORD = 1;
 
         /// <summary>
         /// 16-bit word.
         /// </summary>
-        public static readonly byte WORD = 2;
+        public const byte WORD = 2;
 
         /// <summary>
         /// 32-bit word.
         /// </summary>
-        public static readonly byte LWORD = 4;
+        public const byte LWORD = 4;
 
         /// <summary>
         /// 64-bit word.
@@ -39,7 +39,7 @@ namespace SVM
         [Obsolete(@"Machine has not yet been tested with 64-bit 
                   members and is highly unlike that it can work
                   with variables of this size")]
-        public static readonly byte DWORD = 8;
+        public const byte DWORD = 8;
 
         /*
          * Memory chunk sizes.

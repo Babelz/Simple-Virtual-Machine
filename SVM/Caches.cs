@@ -153,7 +153,11 @@ namespace SVM
         {
             for (int i = 0; i < transitionTable.Length; i++) transitionTable[i].Initialize();
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /// <summary>
+        /// Clears given size cache at given offset.
+        /// </summary>
+        /// <param name="size">cache to clear</param>
+        /// <param name="offset">address offset</param>
         public void ClearCache(int size, int offset)
         {
             transitionTable[size + offset].Initialize();

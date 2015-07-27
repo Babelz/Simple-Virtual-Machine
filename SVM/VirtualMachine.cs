@@ -178,7 +178,7 @@ namespace SVM
         private bool InterpretOpcode(byte opcode)
         {
             // Interpret next opcode and return.
-            if (opcode == Opcodes.Push_Direct.Code)
+            if (opcode == Opcodes.Push_Direct)
             {
                 // Get size of the variable in bytes.
                 byte size = NextProgramByte();
@@ -194,7 +194,7 @@ namespace SVM
 
                 MoveStackPointer(size);
             }
-            else if (opcode == Opcodes.Push_Register.Code)
+            else if (opcode == Opcodes.Push_Register)
             {
                 // Read register address and get its size.
                 byte register = NextProgramByte();
@@ -216,7 +216,7 @@ namespace SVM
 
                 MoveStackPointer(registerCapacity);
             }
-            else if (opcode == Opcodes.Pop.Code)
+            else if (opcode == Opcodes.Pop)
             {
                 Debug.Assert(sp > Registers.HighAddress);
 
@@ -226,7 +226,7 @@ namespace SVM
                 // Everything after this address is trash.
                 MoveStackPointer(-(bytes + 1));
             }
-            else if (opcode == Opcodes.Top.Code)
+            else if (opcode == Opcodes.Top)
             {
                 byte size = NextProgramByte();
                 byte register = NextProgramByte();
@@ -243,7 +243,7 @@ namespace SVM
                 // Copy top of the stack to given register.
                 memory.WriteBytes(register, register + size, cache);
             }
-            else if (opcode == Opcodes.Sp.Code)
+            else if (opcode == Opcodes.Sp)
             {
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterSize(register);
@@ -257,7 +257,7 @@ namespace SVM
 
                 memory.WriteBytes(register, register + 4, cache);
             }
-            else if (opcode == Opcodes.Abort.Code)
+            else if (opcode == Opcodes.Abort)
             {
                 Console.WriteLine("Abort has been called");
                 
@@ -268,7 +268,7 @@ namespace SVM
 
                 return false;
             }
-            else if (opcode == Opcodes.StackAlloc.Code)
+            else if (opcode == Opcodes.StackAlloc)
             {
                 byte size = NextProgramByte();
                 byte[] bytes = NextProgramBytes(size, 0);
@@ -277,7 +277,7 @@ namespace SVM
 
                 memory.Reserve(bytesToAlloc, sp);
             }
-            else if (opcode == Opcodes.ZeroMemory.Code)
+            else if (opcode == Opcodes.ZeroMemory)
             {
                 byte size = NextProgramByte();
                 byte[] bytes = NextProgramBytes(size, 0);
@@ -286,7 +286,7 @@ namespace SVM
 
                 memory.Clear(sp - bytesToClear, sp);
             }
-            else if (opcode == Opcodes.Load.Code)
+            else if (opcode == Opcodes.Load)
             {
                 byte register = NextProgramByte();
                 byte size = NextProgramByte();
@@ -298,14 +298,14 @@ namespace SVM
 
                 memory.WriteBytes(register, register + size, bytes);
             }
-            else if (opcode == Opcodes.Clear.Code)
+            else if (opcode == Opcodes.Clear)
             {
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterSize(register);
 
                 memory.Clear(register, register + registerCapacity);
             }
-            else if (opcode == Opcodes.CopyStack_Direct.Code)
+            else if (opcode == Opcodes.CopyStack_Direct)
             {
                 byte register = NextProgramByte();
                 byte valueSize = NextProgramByte();
@@ -328,7 +328,7 @@ namespace SVM
                 // Copy value from the stack to given register.
                 memory.WriteBytes(register, register + registerCapacity, cache);
             }
-            else if (opcode == Opcodes.CopyStack_IndirectRegister.Code)
+            else if (opcode == Opcodes.CopyStack_IndirectRegister)
             {
                 byte size = NextProgramByte();
                 byte addressRegister = NextProgramByte();
@@ -352,7 +352,7 @@ namespace SVM
                 memory.ReadBytes(sp - size, sp, valueBytes);
                 memory.WriteBytes(targetRegister, targetRegister + targetRegisterCapacity, valueBytes);
             }
-            else if (opcode == Opcodes.PtrStack.Code)
+            else if (opcode == Opcodes.PtrStack)
             {
                 // ptrstack [address_size] [address] [value_size] [value]
                 byte addressSize = NextProgramByte();
@@ -363,9 +363,12 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(addressBytes);
 
+                // TODO: could point anywhere in release build... Make this staph!
+                Debug.Assert(address >= Registers.HighAddress);
+
                 memory.WriteBytes(address, address + addressBytes.Length, valueBytes);
             }
-            else if (opcode == Opcodes.PtrStack_IndirectRegister.Code)
+            else if (opcode == Opcodes.PtrStack_IndirectRegister)
             {
                 byte register = NextProgramByte();
                 byte size = NextProgramByte();
@@ -379,11 +382,13 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(bytes);
 
+                // TODO: could point anywhere... Make this staph!
+
                 Debug.Assert(address >= Registers.HighAddress);
 
                 memory.WriteBytes(address, address + bytes.Length, cache);
             }
-            else if (opcode == Opcodes.GenerateArray_IndirectRegister.Code)
+            else if (opcode == Opcodes.GenerateArray_IndirectRegister)
             {
                 byte lowAddressRegister = NextProgramByte();
                 byte highAddressRegister = NextProgramByte();
@@ -411,7 +416,7 @@ namespace SVM
 
                 MoveStackPointer(totalBytes);
             }
-            else if (opcode == Opcodes.GenerateArray_IndirectStack.Code)
+            else if (opcode == Opcodes.GenerateArray_IndirectStack)
             {
                 byte elementsCountRegister = NextProgramByte();
                 byte elementSize = NextProgramByte();
@@ -441,7 +446,7 @@ namespace SVM
                 memory.WriteBytes(sp, sp + 4, cache);
                 MoveStackPointer(4);
             }
-            else if (opcode == Opcodes.Add_DirectStack.Code)
+            else if (opcode == Opcodes.Add_DirectStack)
             {
                 byte aSize = NextProgramByte();
                 byte bSize = NextProgramByte();
@@ -462,7 +467,7 @@ namespace SVM
 
                 MoveStackPointer(aSize);
             }
-            else if (opcode == Opcodes.Add_IndirectRegister_Stack.Code)
+            else if (opcode == Opcodes.Add_IndirectRegister_Stack)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
@@ -484,7 +489,7 @@ namespace SVM
 
                 MoveStackPointer(aRegisterCapacity);
             }
-            else if (opcode == Opcodes.Add_IndirectRegister_Register.Code)
+            else if (opcode == Opcodes.Add_IndirectRegister_Register)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
@@ -509,7 +514,7 @@ namespace SVM
 
                 memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
             }
-            else if (opcode == Opcodes.Add_DirectStackRegister_Stack.Code)
+            else if (opcode == Opcodes.Add_DirectStackRegister_Stack)
             {
                 byte size = NextProgramByte();
                 byte register = NextProgramByte();
@@ -533,7 +538,7 @@ namespace SVM
 
                 MoveStackPointer(size);
             }
-            else if (opcode == Opcodes.Add_DirectStackRegister_Register.Code)
+            else if (opcode == Opcodes.Add_DirectStackRegister_Register)
             {
                 // Get the size.
                 byte size = program[pc + 1];
@@ -542,7 +547,7 @@ namespace SVM
                 // Dirty hack optimizations?
                 // TODO: see if some of the add variants can be
                 //       done the same way.
-                opcode = Opcodes.Add_DirectStackRegister_Stack.Code;
+                opcode = Opcodes.Add_DirectStackRegister_Stack;
                 InterpretOpcode(opcode);
 
                 // Copy the result to given cache.
@@ -559,7 +564,7 @@ namespace SVM
                 // Before this, we are pointing to this opcodes last argument.
                 MoveProgramCounter(1);
             }
-            else if (opcode == Opcodes.Inc_Reg.Code)
+            else if (opcode == Opcodes.Inc_Reg)
             {
                 byte register = NextProgramByte();
                 byte size = Registers.RegisterSize(register);
@@ -576,7 +581,7 @@ namespace SVM
 
                 Console.WriteLine(ByteHelper.ToInt(rCache));
             }
-            else if (opcode == Opcodes.Inc_Stack.Code)
+            else if (opcode == Opcodes.Inc_Stack)
             {
                 byte size = NextProgramByte();
 
@@ -589,7 +594,7 @@ namespace SVM
 
                 memory.WriteBytes(sp - size, sp, rCache);
             }
-            else if (opcode == Opcodes.Dec_Reg.Code)
+            else if (opcode == Opcodes.Dec_Reg)
             {
                 byte register = NextProgramByte();
                 byte size = Registers.RegisterSize(register);
@@ -603,7 +608,7 @@ namespace SVM
 
                 memory.WriteBytes(register, register + size, rCache);
             }
-            else if (opcode == Opcodes.Dec_Stack.Code)
+            else if (opcode == Opcodes.Dec_Stack)
             {
                 byte size = NextProgramByte();
 
@@ -616,7 +621,7 @@ namespace SVM
 
                 memory.WriteBytes(sp - size, sp, rCache);
             }
-            else if (opcode == Opcodes.Halt.Code)
+            else if (opcode == Opcodes.Halt)
             {
                 Console.WriteLine("Halt was called");
             }
@@ -708,7 +713,7 @@ namespace SVM
                 DumpProgram();
                 DumpRegisters();
 
-                return ReturnCodes.DEBUG_EXCEPTION;
+                return Returs.DEBUG_EXCEPTION;
             }
 #endif
          }

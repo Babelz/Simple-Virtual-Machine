@@ -8,56 +8,6 @@ using System.Threading.Tasks;
 
 namespace SVM
 {
-    public enum AddressingMode
-    {
-        /// <summary>
-        /// Arguments are followed after the opcode.
-        /// </summary>
-        Direct,
-
-        /// <summary>
-        /// Arguments follow after the opcode and some are 
-        /// contained inside registers.
-        /// </summary>
-        DirectRegister,
-
-        /// <summary>
-        /// Arguments are followed after opcode and some are
-        /// contained inside the stack.
-        /// </summary>
-        DirectStack,
-
-        /// <summary>
-        /// Arguments are found inside registers.
-        /// </summary>
-        IndirectRegister,
-
-        /// <summary>
-        /// Arguments are found inside the stack.
-        /// </summary>
-        IndirectStack
-    }
-
-    [DebuggerDisplay("Code = {Code}")]
-    public struct Opcode
-    {
-        public readonly byte Code;
-        public readonly int Args;
-        public readonly AddressingMode AddressingMode;
-
-        public Opcode(byte code, int args = 0, AddressingMode addressingMode = 0) 
-        {
-            Code = code;
-            Args = args;
-            AddressingMode = addressingMode;
-        }
-
-        public static implicit operator byte(Opcode opcode)
-        {
-            return opcode.Code;
-        }
-    }
-
     /// <summary>
     /// Contains all opcodes supported by the virtual machine.
     /// Opcodes that are supported are:
@@ -95,63 +45,6 @@ namespace SVM
     /// </summary>
     public static class Opcodes
     {
-        #region Debug bytecode validation
-#if DEBUG
-        static Opcodes()
-        {
-            // Check that all opcodes have unique
-            // codes. This is a dirty but the most
-            // painless way to do this. Just use reflection to find 
-            // all opcode fields and check them.
-            IEnumerable<Opcode> codesQuery = typeof(Opcodes).GetFields(BindingFlags.Static | BindingFlags.Public)
-                                                            .Where(o => o.GetValue(null).GetType() == typeof(Opcode))
-                                                            .Select(o => o.GetValue(null))
-                                                            .Cast<Opcode>();
-
-            List<Opcode> codes = codesQuery.ToList();
-
-            Console.WriteLine("Checking that all codes are unique...");
-
-            for (int i = 0; i < codes.Count; i++)
-            {
-                for (int j = 0; j < codes.Count; j++)
-                {
-                    if (i == j) continue;
-
-                    Debug.Assert(codes[i].Code != codes[j].Code, "Duplicated code found, code is " + codes[i].Code);
-                }
-
-                codes.RemoveAt(i);
-            }
-
-            List<byte> byteCodes = codesQuery.Select(c => c.Code).ToList();
-            string buffer = string.Empty;
-            int k = 0;
-
-            for (byte i = 0; i < 255; i++)
-            {
-                if (!byteCodes.Contains(i))
-                {
-                    buffer += i.ToString();
-                    if (i + 1 < 255) buffer += "\t ";
-
-                    if (k >= 4)
-                    {
-                        Console.WriteLine(buffer);
-
-                        buffer = string.Empty;
-                        k = 0;
-                    }
-
-                    k++;
-                }
-            }
-
-            Console.WriteLine(string.Format("\nTotal {0} free code slots", 255 - byteCodes.Count));
-        }
-#endif
-        #endregion
-
         // TODO: reorder opcodes by code...
 
         /*
@@ -162,33 +55,33 @@ namespace SVM
         /// <summary>
         /// push [bytes count] [bytes]
         /// </summary>
-        public static readonly Opcode Push_Direct = new Opcode(0x0001, 2, AddressingMode.Direct);
+        public const byte Push_Direct = 0x0001;
 
         /// <summary>
         /// push [register address] 
         /// 
         /// Size of the value depends on the size of the register.
         /// </summary>
-        public static readonly Opcode Push_Register = new Opcode(0x0011, 1, AddressingMode.IndirectRegister);
+        public const byte Push_Register = 0x0011;
 
         /// <summary>
         /// pop [bytes count]
         /// </summary>
-        public static readonly Opcode Pop = new Opcode(0x0002, 1, AddressingMode.Direct);
+        public const byte Pop = 0x0002;
 
         /// <summary>
         /// top [bytes count] [register address] 
         ///
         /// Copies the given amount of bytes from the top of the stack to the given register.
         /// </summary>
-        public static readonly Opcode Top = new Opcode(0x0003, 1, AddressingMode.DirectRegister);
+        public const byte Top = 0x0003;
 
         /// <summary>
         /// sp [register address]
         /// 
         /// Saves stack pointers current address to given register.
         /// </summary>
-        public static readonly Opcode Sp = new Opcode(0x0004, 1, AddressingMode.Direct);
+        public const byte Sp = 0x0004;
 
         #endregion
 
@@ -202,14 +95,14 @@ namespace SVM
         /// 
         /// Causes the program to abort. 
         /// </summary>
-        public static readonly Opcode Abort = new Opcode(0x0005);
+        public const byte Abort = 0x0005;
 
         /// <summary>
         /// halt
         /// 
         /// Causes the program to halt. Useful for debugging purposes.
         /// </summary>
-        public static readonly Opcode Halt = new Opcode(0x0015);
+        public const byte Halt = 0x0015;
         
         #endregion
 
@@ -223,7 +116,7 @@ namespace SVM
         /// 
         /// stackalloc [size (word)] [bytes]
         /// </summary>
-        public static readonly Opcode StackAlloc = new Opcode(0x0006, 2, AddressingMode.Direct);
+        public const byte StackAlloc = 0x0006;
 
         // TODO: is this shit needed?
         /// <summary>
@@ -231,14 +124,14 @@ namespace SVM
         /// 
         /// zeromemory [size (word)] [bytes]
         /// </summary>
-        public static readonly Opcode ZeroMemory = new Opcode(0x00016, 2, AddressingMode.Direct);
+        public const byte ZeroMemory = 0x00016;
 
         /// <summary>
         /// Allocates new array of given size. Stores begin and end address to given registers.
         /// 
         /// array [register (begin)] [register (end)] [register (elements count)] [elements size (word)]
         /// </summary>
-        public static readonly Opcode GenerateArray_IndirectRegister = new Opcode(0x0026, 4, AddressingMode.IndirectRegister);
+        public const byte GenerateArray_IndirectRegister = 0x0026;
 
         /// <summary>
         /// Allocates new array of given size. Stores begin and end address to the stack.
@@ -247,7 +140,7 @@ namespace SVM
         /// 
         /// Values store are 32-bit addresses.
         /// </summary>
-        public static readonly Opcode GenerateArray_IndirectStack = new Opcode(0x0036, 4, AddressingMode.IndirectStack);
+        public const byte GenerateArray_IndirectStack = 0x0036;
         
         #endregion
 
@@ -261,21 +154,21 @@ namespace SVM
         /// 
         /// load [register] [bytes count] [value]
         /// </summary>
-        public static readonly Opcode Load = new Opcode(0x0007, 3, AddressingMode.Direct);
+        public const byte Load = 0x0007;
         
         /// <summary>
         /// Copies value from given address from the stack to given register
         /// 
         /// copystack [register] [value_size (word)] [address_size (word)] [address]
         /// </summary>
-        public static readonly Opcode CopyStack_Direct = new Opcode(0x0017, 3, AddressingMode.Direct);
+        public const byte CopyStack_Direct = 0x0017;
 
         /// <summary>
         /// Copies value from given address contained inside given register from the stack to given register
         /// 
         /// copystack [size] [address_register] [target_register]
         /// </summary>
-        public static readonly Opcode CopyStack_IndirectRegister = new Opcode(0x0027, 3, AddressingMode.IndirectRegister);
+        public const byte CopyStack_IndirectRegister = 0x0027;
 
 
         /// <summary>
@@ -283,21 +176,21 @@ namespace SVM
         /// 
         /// ptrstack [address_size] [address] [value_size] [value]
         /// </summary>
-        public static readonly Opcode PtrStack = new Opcode(0x0037, 3, AddressingMode.Direct);
+        public const byte PtrStack = 0x0037;
 
         /// <summary>
         /// Sets given value at given location on the stack
         /// 
         /// ptrstack [address_register] [size] [value]
         /// </summary>
-        public static readonly Opcode PtrStack_IndirectRegister = new Opcode(0x0047, 3, AddressingMode.IndirectRegister);
+        public const byte PtrStack_IndirectRegister = 0x0047;
 
         /// <summary>
         /// Clears given register.
         /// 
         /// clear [register]
         /// </summary>
-        public static readonly Opcode Clear = new Opcode(0x0008, 1, AddressingMode.Direct);
+        public const byte Clear = 0x0008;
 
         #endregion
 
@@ -311,63 +204,63 @@ namespace SVM
         /// 
         /// add [size (word)] [size (word)]
         /// </summary>
-        public static readonly Opcode Add_DirectStack = new Opcode(0x0009, 2);
+        public const byte Add_DirectStack = 0x0009;
 
         /// <summary>
         /// Add two register values together and store result on the stack.
         /// 
         /// add [register_a] [register_b]
         /// </summary>
-        public static readonly Opcode Add_IndirectRegister_Stack = new Opcode(0x0019, 2, AddressingMode.IndirectRegister);
+        public const byte Add_IndirectRegister_Stack = 0x0019;
         
         /// <summary>
         /// Add two register values together and store result to given register.
         /// 
         /// add [register_a] [register_b] [result register]
         /// </summary>
-        public static readonly Opcode Add_IndirectRegister_Register = new Opcode(0x0029, 2, AddressingMode.IndirectRegister);
+        public const byte Add_IndirectRegister_Register = 0x0029;
 
         /// <summary>
         /// Add top of the stack and a register value together. Stores result to the stack.
         /// 
         /// add [size (word)] [register]
         /// </summary>
-        public static readonly Opcode Add_DirectStackRegister_Stack = new Opcode(0x0039, 2, AddressingMode.DirectRegister);
+        public const byte Add_DirectStackRegister_Stack = 0x0039;
 
         /// <summary>
         /// Add top of the stack and a register value together. Stores result to the given register.
         /// 
         /// add [size (word)] [register_a] [result register]
         /// </summary>
-        public static readonly Opcode Add_DirectStackRegister_Register = new Opcode(0x0059, 3, AddressingMode.DirectRegister);
+        public const byte Add_DirectStackRegister_Register = 0x0059;
 
         /// <summary>
         /// Increase given registers value by one.
         /// 
         /// increg [register address]
         /// </summary>
-        public static readonly Opcode Inc_Reg = new Opcode(0x001A, 1, AddressingMode.Direct);
+        public const byte Inc_Reg = 0x001A;
         
         /// <summary>
         /// Increase top value of the stack by one.
         /// 
         /// incstack [size (word)]
         /// </summary>
-        public static readonly Opcode Inc_Stack = new Opcode(0x002A, 1, AddressingMode.Direct);
+        public const byte Inc_Stack = 0x002A;
 
         /// <summary>
         /// Decrease given registers value by one.
         /// 
         /// decreg [register address]
         /// </summary>
-        public static readonly Opcode Dec_Reg = new Opcode(0x003A, 1, AddressingMode.Direct);
+        public const byte Dec_Reg = 0x003A;
         
         /// <summary>
         /// Decrease top value of the stack by one.
         /// 
         /// decstack [size (word)]
         /// </summary>
-        public static readonly Opcode Dec_Stack = new Opcode(0x004A, 1, AddressingMode.Direct);
+        public const byte Dec_Stack = 0x004A;
         #endregion
     }
 }

@@ -87,15 +87,15 @@ namespace SVM
          * TODO: find memory leaks. Not sure if pointer operations cause it.
          */
         #region Static caches
-        // Temp, stateless variables used with functions.
+        // Temp variables used with functions.
         private static readonly int[] aIntCache = new int[1];
         private static readonly int[] bIntCache = new int[1];
         #endregion
 
-        public static readonly byte[] HWORDONE = new byte[1] { 1 };
-        public static readonly byte[] WORDONE  = new byte[2] { 1, 0 };
-        public static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
-        public static readonly byte[] DWORDONE = new byte[8] { 1, 0, 0, 0, 0, 0, 0, 0 };
+        private static readonly byte[] HWORDONE = new byte[1] { 1 };
+        private static readonly byte[] WORDONE = new byte[2] { 1, 0 };
+        private static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
+        private static readonly byte[] DWORDONE = new byte[8] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
         /// <summary>
         /// Converts given bytes to integer. Currently supports
@@ -241,13 +241,47 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetOneByteArray(byte size)
         {
-            // TODO: fix this shit. ToArray should not be called.
-            //       reason for this is that some opcodes use this
-            //       method and they modify the reference.
-            if (size == Sizes.HWORD)     return HWORDONE.ToArray();
-            if (size == Sizes.WORD)      return WORDONE.ToArray();
-            if (size == Sizes.LWORD)     return LWORDONE.ToArray();
-            if (size == Sizes.DWORD)     return DWORDONE.ToArray();
+            // Clear all other bytes and toggle the first one,
+            // array could be dirty..
+
+            // TODO: fix this in some other way, maybe create a custom readonly array?
+
+            if (size == Sizes.HWORD)
+            {
+                HWORDONE[0] = 1;
+
+                return HWORDONE;
+            }
+            else if (size == Sizes.WORD)
+            {
+                DWORDONE[0] = 1;
+                DWORDONE[1] = 0;
+
+                return WORDONE;
+            }
+            else if (size == Sizes.LWORD)
+            {
+                DWORDONE[0] = 1;
+                DWORDONE[1] = 0;
+                DWORDONE[2] = 0;
+                DWORDONE[3] = 0;
+                DWORDONE[4] = 0;
+
+                return LWORDONE;
+            }
+            else if (size == Sizes.DWORD)
+            {
+                DWORDONE[0] = 1;
+                DWORDONE[1] = 0;
+                DWORDONE[2] = 0;
+                DWORDONE[3] = 0;
+                DWORDONE[4] = 0;
+                DWORDONE[5] = 0;
+                DWORDONE[6] = 0;
+                DWORDONE[7] = 0;
+
+                return DWORDONE;
+            }
 
             return DWORDONE;
         }
