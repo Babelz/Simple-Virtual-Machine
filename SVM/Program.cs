@@ -29,10 +29,12 @@ namespace SVM
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
 
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
+
             for (int i = 0; i < 1000000; i++)
             {
                 program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
-                program.AddBytes(Bytecodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
+                program.AddBytes(Bytecodes.Math_DirectStack, Sizes.WORD, Sizes.WORD);
             }
 
             program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);

@@ -20,7 +20,7 @@ namespace SVM
         /// <summary>
         /// High address of registers. 
         /// </summary>
-        public const byte HighAddress = 62;
+        public const byte HighAddress = 61;
 
         /*
          * 8-bit registers.
@@ -56,7 +56,7 @@ namespace SVM
 
         /// <summary>
         /// Low address of the flags register.
-        /// 16-bit register.
+        /// 8-bit register.
         /// </summary>
         public const byte FLAGS = 60;
 

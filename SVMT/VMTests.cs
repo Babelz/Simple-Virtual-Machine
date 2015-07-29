@@ -14,14 +14,15 @@ namespace SVMT
         private VirtualMachine svm = new VirtualMachine();
 
         [TestMethod]    
-        public void Add_DirectStack_Tests()
+        public void Math_DirectStack_Tests()
         {
             // Add direct stack.
             ByteCodeProgram program1 = new ByteCodeProgram();
 
             program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 8, 0);
             program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 7, 0);
-            program1.AddBytes(Bytecodes.Add_DirectStack, Sizes.WORD, Sizes.WORD);
+            program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
+            program1.AddBytes(Bytecodes.Math_DirectStack, Sizes.WORD, Sizes.WORD);
             program1.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.AA);
 
             svm.Initialize();
@@ -33,7 +34,7 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Add_IndirectRegister_Stack_Tests()
+        public void Math_IndirectRegister_Stack_Tests()
         {
             Random r = new Random();
 
@@ -44,9 +45,10 @@ namespace SVMT
 
                 // Add direct stack.
                 ByteCodeProgram program1 = new ByteCodeProgram();
+                program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
                 program1.AddBytes(Bytecodes.Load, Registers.AB, Sizes.LWORD, lbs1, 0, 0, 0);
                 program1.AddBytes(Bytecodes.Load, Registers.BB, Sizes.LWORD, lbs2, 0, 0, 0);
-                program1.AddBytes(Bytecodes.Add_IndirectRegister_Stack, Registers.AB, Registers.BB);
+                program1.AddBytes(Bytecodes.Math_IndirectRegister_Stack, Registers.AB, Registers.BB);
                 program1.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.CB);
 
                 svm.Initialize();
@@ -59,17 +61,18 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Add_IndirectRegister_Register_Tests()
+        public void Math_IndirectRegister_Register_Tests()
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
             program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
-            program.AddBytes(Bytecodes.Add_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.CA);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
+            program.AddBytes(Bytecodes.Math_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.CA);
 
             for (int i = 0; i < 1000; i++)
             {
                 program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
-                program.AddBytes(Bytecodes.Add_IndirectRegister_Register, Registers.AA, Registers.CA, Registers.CA);
+                program.AddBytes(Bytecodes.Math_IndirectRegister_Register, Registers.AA, Registers.CA, Registers.CA);
             }
 
             svm.Initialize();
@@ -81,16 +84,17 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Add_DirectStackRegister_Stack_Tests()
+        public void Math_DirectStackRegister_Stack_Tests()
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
 
             for (int i = 0; i < 10000; i++)
             {
                 program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
-                program.AddBytes(Bytecodes.Add_DirectStackRegister_Stack, Sizes.WORD, Registers.AA);
+                program.AddBytes(Bytecodes.Math_DirectStackRegister_Stack, Sizes.WORD, Registers.AA);
             }
 
             program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);
@@ -104,16 +108,17 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Add_DirectStackRegister_Register_Tests()
+        public void Math_DirectStackRegister_Register_Tests()
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
             program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
 
             for (int i = 0; i < 10000; i++)
             {
                 program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
-                program.AddBytes(Bytecodes.Add_DirectStackRegister_Register, Sizes.WORD, Registers.BA, Registers.BA);
+                program.AddBytes(Bytecodes.Math_DirectStackRegister_Register, Sizes.WORD, Registers.BA, Registers.BA);
             }
 
             svm.Initialize();

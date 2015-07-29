@@ -13,11 +13,10 @@ namespace SVM
     /// Contains all bytecodes supported by the virtual machine.
     public static class Bytecodes
     {
-        // Mask bits are 3 MSB's.
+        // 29.7.2015: masking failure. Redo.
 
         /*
-         * Stack operations.
-         * Mask is 1000 0000 (128).
+         * Stack operations
          */
         #region
 
@@ -60,8 +59,7 @@ namespace SVM
         #endregion
 
         /*
-         * Control flow.
-         * Mask is 0100 0000 (64).
+         * Control flow
          */
         #region
 
@@ -82,8 +80,7 @@ namespace SVM
         #endregion
 
         /*
-         * Memory operations.
-         * 0010 0000 (32).
+         * Memory operations
          */
         #region
 
@@ -135,8 +132,7 @@ namespace SVM
         #endregion
 
         /*
-         * Register operations.
-         * 0001 0000 (32).
+         * Register operations
          */
         #region
 
@@ -172,54 +168,43 @@ namespace SVM
 
         /*
          * Arithmetic operations
-         * 11000 0000
          */
         #region
 
         /// <summary>
-        /// Add two top values from the stack and store result on the stack.
+        /// Math two top values from the stack and store result on the stack.
         /// 
-        /// add [size (word)] [size (word)]
+        /// Math [size (word)] [size (word)]
         /// </summary>
-        public const byte Add_DirectStack = 0x0000;
+        public const byte Math_DirectStack = 0x0000;
 
         /// <summary>
-        /// Add two register values together and store result on the stack.
+        /// Math two register values together and store result on the stack.
         /// 
-        /// add [register_a] [register_b]
+        /// Math [register_a] [register_b]
         /// </summary>
-        public const byte Add_IndirectRegister_Stack = 0x0001;
+        public const byte Math_IndirectRegister_Stack = 0x0001;
         
         /// <summary>
-        /// Add two register values together and store result to given register.
+        /// Math two register values together and store result to given register.
         /// 
-        /// add [register_a] [register_b] [result register]
+        /// Math [register_a] [register_b] [result register]
         /// </summary>
-        public const byte Add_IndirectRegister_Register = 0x0002;
+        public const byte Math_IndirectRegister_Register = 0x0002;
 
         /// <summary>
-        /// Add top of the stack and a register value together. Stores result to the stack.
+        /// Math top of the stack and a register value together. Stores result to the stack.
         /// 
-        /// add [size (word)] [register]
+        /// Math [size (word)] [register]
         /// </summary>
-        public const byte Add_DirectStackRegister_Stack = 0x0003;
+        public const byte Math_DirectStackRegister_Stack = 0x0003;
 
         /// <summary>
-        /// Add top of the stack and a register value together. Stores result to the given register.
+        /// Math top of the stack and a register value together. Stores result to the given register.
         /// 
-        /// add [size (word)] [register_a] [result register]
+        /// Math [size (word)] [register_a] [result register]
         /// </summary>
-        public const byte Add_DirectStackRegister_Register = 0x0004;
-
-        public const byte Sub_DirectStack = 0x0005;
-
-        public const byte Sub_IndirectRegister_stack = 0x0006;
-
-        public const byte Sub_IndirectRegister_Register = 0x0007;
-
-        public const byte Sub_DirectStackRegister_Stack = 0x0008;
-
-        public const byte Sub_DirectStackRegister_Register = 0x0009;
+        public const byte Math_DirectStackRegister_Register = 0x0004;
 
         /// <summary>
         /// Increase given registers value by one.
@@ -250,25 +235,34 @@ namespace SVM
         public const byte Dec_Stack = 0x000D;
         #endregion
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStackOperation(byte bytecode)
-        {
-            return ((bytecode >> 7) & 1) == 1;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsFlowOperation(byte bytecode)
-        {
-            return ((bytecode >> 6) & 1) == 1;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsMemoryOperation(byte bytecode)
-        {
-            return ((bytecode >> 5) & 1) == 1;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsRegisterOperation(byte bytecode)
-        {
-            return ((bytecode >> 4) & 1) == 1;
-        }
+        /*
+         * Flag and misc operations
+         */ 
+        #region
+
+        /// <summary>
+        /// Sets the flag register to given value. Value must be a word.
+        /// 
+        /// flag [value (size of word)]
+        /// </summary>
+        public const byte Set_Flag_Direct = 0x007F;
+
+        /// <summary>
+        /// Sets the flag register to given value contained inside a register.
+        /// Only first byte is used.
+        /// 
+        /// flag [register_address]
+        /// </summary>
+        /// 
+        public const byte Set_Flag_IndirectRegister = 0x007E;
+        /// <summary>
+        /// Sets the flag register to given value contained at the top
+        /// of the stack. Only one byte is used to set the flags.
+        /// 
+        /// flag
+        /// </summary>
+        public const byte Set_Flag_IndirectStack = 0x007D;
+
+        #endregion
     }
 }
