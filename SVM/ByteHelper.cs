@@ -190,11 +190,6 @@ namespace SVM
                     for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
                     for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
 
-                    if (lhs[0] == 255)
-                    {
-                        Console.WriteLine("ASDASDASD");
-                    }
-
                     int value = aIntCache[0] + bIntCache[0];
 
                     *(int*)resultPtr = value;
@@ -221,6 +216,15 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Negate(byte[] bytes)
         {
+            /*
+            int num = ByteHelper.ToInt(bytes);
+            num = ~num;
+
+            num++;
+
+            ByteHelper.ToBytes(num, bytes);
+            */
+
             for (int i = 0; i < bytes.Length; i++) bytes[i] = (byte)~bytes[i];
 
             ByteHelper.AddBytes(bytes, ByteHelper.GetOneByteArray((byte)bytes.Length), bytes);
@@ -246,6 +250,8 @@ namespace SVM
 
             // TODO: fix this in some other way, maybe create a custom readonly array?
 
+            #region Old (no allocs)
+
             if (size == Sizes.HWORD)
             {
                 HWORDONE[0] = 1;
@@ -254,17 +260,17 @@ namespace SVM
             }
             else if (size == Sizes.WORD)
             {
-                DWORDONE[0] = 1;
-                DWORDONE[1] = 0;
+                WORDONE[0] = 1;
+                WORDONE[1] = 0;
 
                 return WORDONE;
             }
             else if (size == Sizes.LWORD)
             {
-                DWORDONE[0] = 1;
-                DWORDONE[1] = 0;
-                DWORDONE[2] = 0;
-                DWORDONE[3] = 0;
+                LWORDONE[0] = 1;
+                LWORDONE[1] = 0;
+                LWORDONE[2] = 0;
+                LWORDONE[3] = 0;
                 
                 return LWORDONE;
             }
@@ -283,6 +289,14 @@ namespace SVM
             }
 
             return DWORDONE;
+
+            #endregion
+
+            /*byte[] bytes = new byte[size];
+            
+            bytes[0] = 1;
+
+            return bytes;*/
         }
     }
 }

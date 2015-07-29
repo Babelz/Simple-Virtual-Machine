@@ -8,3 +8,4 @@ C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Release\SVM.exe
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Release\SVM.pdb
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Release\SVM.exe
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\bin\Release\SVM.pdb
+C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVM\obj\Release\SVM.csprojResolveAssemblyReference.cache
