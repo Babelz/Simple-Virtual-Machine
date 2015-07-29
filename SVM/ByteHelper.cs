@@ -87,11 +87,13 @@ namespace SVM
          * TODO: find memory leaks. Not sure if pointer operations cause it.
          */
         #region Static caches
+
         // Temp variables used with functions.
         private static readonly int[] aIntCache = new int[1];
         private static readonly int[] bIntCache = new int[1];
         #endregion
 
+        #region Word ones
         private static readonly byte[] HWORDONE = new byte[1] { 1 };
         private static readonly byte[] WORDONE  = new byte[2] { 1, 0 };
         private static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
@@ -105,14 +107,74 @@ namespace SVM
             DWORDONE
         };
 
+        #endregion
+
+        #region ByteOperation enum
+
+        private enum ByteOperation
+        {
+            Add,
+            Sub,
+            Div,
+            Mul,
+            Mod
+        }
+
+        #endregion
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe static void ProcessBytecodeOperation(byte[] lhs, byte[] rhs, byte[] results, ByteOperation operation)
+        {
+            aIntCache[0] = 0;
+            bIntCache[0] = 0;
+
+            fixed (byte* resultPtr = results)
+            {
+                fixed (int* lhsPtr = aIntCache)
+                fixed (int* rhsPtr = bIntCache)
+                {
+                    byte* lhsValPtr = (byte*)lhsPtr;
+                    byte* rhsValPtr = (byte*)rhsPtr;
+
+                    for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
+                    for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
+
+                    int value = 0;
+
+                    switch (operation)
+                    {
+                        case ByteOperation.Add:
+                            value = aIntCache[0] + bIntCache[0];
+                            break;
+                        case ByteOperation.Sub:
+                            value = aIntCache[0] - bIntCache[0];
+                            break;
+                        case ByteOperation.Div:
+                            value = aIntCache[0] / bIntCache[0];
+                            break;
+                        case ByteOperation.Mul:
+                            value = aIntCache[0] * bIntCache[0];
+                            break;
+                        case ByteOperation.Mod:
+                            value = aIntCache[0] % bIntCache[0];
+                            break;
+                        default:
+                            break;
+                    }
+
+                    *(int*)resultPtr = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Converts given bytes to integer. Currently supports
         /// max 4-bytes.
         /// </summary>
-        /// <param name="bytes">bytes to convert</param>
+        /// <param name="results">bytes to convert</param>
         /// <returns>converted value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static int ToInt(params byte[] bytes)
+        public unsafe static int ToInt(params byte[] results)
         {
             aIntCache[0] = 0;
 
@@ -120,7 +182,7 @@ namespace SVM
             {
                 byte* resultValPtr = (byte*)resultPtr;
 
-                for (int i = 0; i < bytes.Length; i++) resultValPtr[i] = bytes[i];
+                for (int i = 0; i < results.Length; i++) resultValPtr[i] = results[i];
             }
 
             return aIntCache[0];
@@ -131,12 +193,12 @@ namespace SVM
         /// max 4-bytes.
         /// </summary>
         /// <param name="value">value to convert</param>
-        /// <param name="bytes">bytes to convert</param>
+        /// <param name="results">bytes to convert</param>
         /// <returns>converted bytes</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void ToBytes(int value, byte[] bytes)
+        public unsafe static void ToBytes(int value, byte[] results)
         {
-            fixed (byte* resultPtr = bytes)
+            fixed (byte* resultPtr = results)
             {
                 *(int*)resultPtr = value;
             }
@@ -151,82 +213,33 @@ namespace SVM
         /// <param name="rhs">right hand side bytes</param>
         /// <returns>lhs + rhs</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static int AddInt(byte[] lhs, byte[] rhs)
+        public unsafe static void AddBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            aIntCache[0] = 0;
-            bIntCache[0] = 0;
-
-            int result = 0;
-
-            fixed (int* lhsResultPtr = aIntCache)
-            fixed (int* rhsResultPtr = bIntCache)
-            {
-                byte* lhsValPtr = (byte*)lhsResultPtr;
-                byte* rhsValPtr = (byte*)rhsResultPtr;
-
-                for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
-                for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
-
-                result = aIntCache[0] + bIntCache[0];
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Adds two variables presented as bytes together 
-        /// and returns the result to the caller. This function supports
-        /// max of 4-bytes per variable currently.
-        /// </summary>
-        /// <param name="lhs">left hand side bytes</param>
-        /// <param name="rhs">right hand side bytes</param>
-        /// <returns>lhs + rhs</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void AddBytes(byte[] lhs, byte[] rhs, byte[] bytes)
-        {
-            aIntCache[0] = 0;
-            bIntCache[0] = 0;
-
-            fixed (byte* resultPtr = bytes)
-            {
-                fixed (int* lhsPtr = aIntCache)
-                fixed (int* rhsPtr = bIntCache)
-                {
-                    byte* lhsValPtr = (byte*)lhsPtr;
-                    byte* rhsValPtr = (byte*)rhsPtr;
-
-                    for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
-                    for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
-
-                    int value = aIntCache[0] + bIntCache[0];
-
-                    *(int*)resultPtr = value;
-                }
-            }
+            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Add);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int SubtractInt(byte[] lhs, byte[] rhs)
+        public static void SubtractBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.Negate(rhs);
-
-            return ByteHelper.AddInt(lhs, rhs);
+            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Sub);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SubtractBytes(byte[] lhs, byte[] rhs, byte[] bytes)
+        public static void DivideBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.Negate(rhs);
-
-            ByteHelper.AddBytes(lhs, rhs, bytes);
+            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Div);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Negate(byte[] bytes)
+        public static void MultiplyBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            for (int i = 0; i < bytes.Length; i++) bytes[i] = (byte)~bytes[i];
+            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Mul);
+        }
 
-            ByteHelper.AddBytes(bytes, WORDONES[bytes.Length - 1], bytes);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ModuloFromBytes(byte[] lhs, byte[] rhs, byte[] results)
+        {
+            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Mod);
         }
 
         public static string ToBinaryString(byte[] bytes)

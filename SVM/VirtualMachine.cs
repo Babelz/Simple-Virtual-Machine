@@ -94,7 +94,7 @@ namespace SVM
         {
             // 64Kb should be enough memory for the 
             // starters.
-            memory = new MemoryManager(Sizes.CHUNK_16KB);
+            memory = new MemoryManager(Sizes.CHUNK_32KB);
             
             // 8Kb should be enough for the cache
             // at this time.
@@ -103,7 +103,10 @@ namespace SVM
             mathFunctions = new Action<byte[], byte[], byte[]>[]
             {
                 ByteHelper.AddBytes,
-                ByteHelper.SubtractBytes
+                ByteHelper.SubtractBytes,
+                ByteHelper.DivideBytes,
+                ByteHelper.MultiplyBytes,
+                ByteHelper.ModuloFromBytes
             };
         }
 

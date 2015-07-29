@@ -27,13 +27,16 @@ namespace SVMT
         {
             byte[] lhs = new byte[4];
             byte[] rhs = new byte[4];
+            byte[] bytes = new byte[4];
 
             for (int i = 0; i < 100000; i++)
             {
                 ByteHelper.ToBytes(i * 2, lhs);
                 ByteHelper.ToBytes(i * 4, rhs);
 
-                int result = ByteHelper.AddInt(lhs, rhs);
+                ByteHelper.AddBytes(lhs, rhs, bytes);
+
+                int result = ByteHelper.ToInt(bytes);
 
                 Assert.AreEqual((i * 2) + (i * 4), result, string.Format("i: {0} - res: {1}", i * 2, result));
             }
@@ -44,13 +47,16 @@ namespace SVMT
         {
             byte[] lhs = new byte[4];
             byte[] rhs = new byte[4];
+            byte[] bytes = new byte[4];
 
             for (int i = 0; i < 100000; i++)
             {
                 ByteHelper.ToBytes(i * 2, lhs);
                 ByteHelper.ToBytes(i, rhs);
 
-                int result = ByteHelper.SubtractInt(lhs, rhs);
+                ByteHelper.SubtractBytes(lhs, rhs, bytes);
+
+                int result = ByteHelper.ToInt(bytes);
 
                 Assert.AreEqual(i * 2 - i, result);
             }
