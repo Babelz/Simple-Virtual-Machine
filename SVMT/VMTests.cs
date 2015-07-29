@@ -13,8 +13,12 @@ namespace SVMT
     {
         private VirtualMachine svm = new VirtualMachine();
 
-        [TestMethod]    
-        public void Math_DirectStack_Tests()
+        /*
+         * Add tests
+         */
+
+        [TestMethod]
+        public void Add_DirectStack_Tests()
         {
             // Add direct stack.
             ByteCodeProgram program1 = new ByteCodeProgram();
@@ -34,7 +38,7 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Math_IndirectRegister_Stack_Tests()
+        public void Add_IndirectRegister_Stack_Tests()
         {
             Random r = new Random();
 
@@ -61,7 +65,7 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Math_IndirectRegister_Register_Tests()
+        public void Add_IndirectRegister_Register_Tests()
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
@@ -84,7 +88,7 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Math_DirectStackRegister_Stack_Tests()
+        public void Add_DirectStackRegister_Stack_Tests()
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
@@ -108,7 +112,7 @@ namespace SVMT
         }
 
         [TestMethod]
-        public void Math_DirectStackRegister_Register_Tests()
+        public void Add_DirectStackRegister_Register_Tests()
         {
             ByteCodeProgram program = new ByteCodeProgram();
 
@@ -127,6 +131,127 @@ namespace SVMT
             int result = svm.ReadRegisterValue(Registers.BA);
 
             Assert.AreEqual(result, 10001);
+        }
+
+        /*
+         * Sub tests
+         */
+
+        [TestMethod]
+        public void Sub_DirectStack_Tests()
+        {
+            // Add direct stack.
+            ByteCodeProgram program1 = new ByteCodeProgram();
+
+            // a - b..
+            program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 10, 0);
+            program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 15, 0);
+            program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program1.AddBytes(Bytecodes.Math_DirectStack, Sizes.WORD, Sizes.WORD);
+            program1.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.AA);
+
+            svm.Initialize();
+            svm.RunProgram(program1);
+
+            int result = svm.ReadRegisterValue(Registers.AA);
+
+            Assert.AreEqual(5, result, "Direct stack failed");
+        }
+
+        [TestMethod]
+        public void Sub_IndirectRegister_Stack_Tests()
+        {
+            Random r = new Random();
+
+            for (int i = 0; i < 64; i++)
+            {
+                byte lbs1 = (byte)(i + r.Next(0, 64));
+                byte lbs2 = (byte)(i + r.Next(0, 64));
+
+                // Add direct stack.
+                ByteCodeProgram program1 = new ByteCodeProgram();
+                program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+                program1.AddBytes(Bytecodes.Load, Registers.BB, Sizes.LWORD, Math.Min(lbs1, lbs2), 0, 0, 0);
+                program1.AddBytes(Bytecodes.Load, Registers.AB, Sizes.LWORD, Math.Max(lbs1, lbs2), 0, 0, 0);
+                program1.AddBytes(Bytecodes.Math_IndirectRegister_Stack, Registers.AB, Registers.BB);
+                program1.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.CB);
+
+                svm.Initialize();
+                svm.RunProgram(program1);
+
+                int result = svm.ReadRegisterValue(Registers.CB);
+
+                Assert.AreEqual(Math.Max(lbs1, lbs2) - Math.Min(lbs1, lbs2), result, "IndirectRegister_Stack failed");
+            }
+        }
+
+        [TestMethod]
+        public void Sub_IndirectRegister_Register_Tests()
+        {
+            ByteCodeProgram program = new ByteCodeProgram();
+
+            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD).AddValue(1000, 2);
+            program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+
+            for (int i = 0; i < 1000; i++)
+            {
+                program.AddBytes(Bytecodes.Math_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.CA);
+            }
+
+            svm.Initialize();
+            svm.RunProgram(program);
+
+            int result = svm.ReadRegisterValue(Registers.CA);
+
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void Sub_DirectStackRegister_Stack_Tests()
+        {
+            ByteCodeProgram program = new ByteCodeProgram();
+
+            program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1000, 2);
+            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+
+            for (int i = 0; i < 10000; i++)
+            {
+                program.AddBytes(Bytecodes.Math_DirectStackRegister_Stack, Sizes.WORD, Registers.AA);
+            }
+
+            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);
+
+            svm.Initialize();
+            svm.RunProgram(program);
+
+            int result = svm.ReadRegisterValue(Registers.BA);
+
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void Sub_DirectStackRegister_Register_Tests()
+        {
+            ByteCodeProgram program = new ByteCodeProgram();
+
+            program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD).AddValue(1, 2);
+            program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1000, 2);
+
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+
+            for (int i = 0; i < 10000; i++)
+            {
+                program.AddBytes(Bytecodes.Math_DirectStackRegister_Register, Sizes.WORD, Registers.BA, Registers.CA);
+            }
+
+            svm.Initialize();
+            svm.RunProgram(program);
+
+            int result = svm.ReadRegisterValue(Registers.CA);
+
+            Assert.AreEqual(result, 0);
         }
 
         [TestMethod]

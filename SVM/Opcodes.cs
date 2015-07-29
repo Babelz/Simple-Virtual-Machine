@@ -172,35 +172,35 @@ namespace SVM
         #region
 
         /// <summary>
-        /// Math two top values from the stack and store result on the stack.
+        /// Executes math operation with two top of the stack and store result on the stack.
         /// 
         /// Math [size (word)] [size (word)]
         /// </summary>
         public const byte Math_DirectStack = 0x0000;
 
         /// <summary>
-        /// Math two register values together and store result on the stack.
+        /// Executes math operation with two register values and stores result on the stack.
         /// 
         /// Math [register_a] [register_b]
         /// </summary>
         public const byte Math_IndirectRegister_Stack = 0x0001;
         
         /// <summary>
-        /// Math two register values together and store result to given register.
+        /// Executes math operation with two register values and stores result to given register.
         /// 
         /// Math [register_a] [register_b] [result register]
         /// </summary>
         public const byte Math_IndirectRegister_Register = 0x0002;
 
         /// <summary>
-        /// Math top of the stack and a register value together. Stores result to the stack.
+        /// Executes math operation on top of the stack and a register value. Stores result to the stack.
         /// 
         /// Math [size (word)] [register]
         /// </summary>
         public const byte Math_DirectStackRegister_Stack = 0x0003;
 
         /// <summary>
-        /// Math top of the stack and a register value together. Stores result to the given register.
+        /// Executes math operation with top of the stack and a register value. Stores result to the given register.
         /// 
         /// Math [size (word)] [register_a] [result register]
         /// </summary>

@@ -92,7 +92,18 @@ namespace SVM
         private static readonly int[] bIntCache = new int[1];
         #endregion
 
+        private static readonly byte[] HWORDONE = new byte[1] { 1 };
+        private static readonly byte[] WORDONE  = new byte[2] { 1, 0 };
+        private static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
         private static readonly byte[] DWORDONE = new byte[8] { 1, 0, 0, 0, 0, 0, 0, 0 };
+
+        private static readonly byte[][] WORDONES = new byte[][]
+        {
+            HWORDONE,
+            WORDONE,
+            LWORDONE,
+            DWORDONE
+        };
 
         /// <summary>
         /// Converts given bytes to integer. Currently supports
@@ -215,7 +226,7 @@ namespace SVM
         {
             for (int i = 0; i < bytes.Length; i++) bytes[i] = (byte)~bytes[i];
 
-            ByteHelper.AddBytes(bytes, DWORDONE, bytes);
+            ByteHelper.AddBytes(bytes, WORDONES[bytes.Length - 1], bytes);
         }
 
         public static string ToBinaryString(byte[] bytes)

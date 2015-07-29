@@ -71,14 +71,14 @@ namespace SVM
         {
             get
             {
-                return memory.HighAddress - Registers.HighAddress + 1;
+                return memory.HighAddress - Registers.HighAddress;
             }
         }
         public int StackLowAddress
         {
             get
             {
-                return Registers.HighAddress + 1;
+                return Registers.HighAddress;
             }
         }
         public int StackHighAddress
@@ -177,7 +177,7 @@ namespace SVM
             // Stack pointer should start from register 
             // high address since registers live below this 
             // address.
-            sp = Registers.HighAddress + 1;
+            sp = Registers.HighAddress;
 
             // Reset pc and retpc registers.
             pc = retpc = 0;
@@ -199,11 +199,11 @@ namespace SVM
                 Debug.Assert(size <= Sizes.DWORD);
 
                 // Read the variable values.
-                byte[] bits = NextProgramBytes(size, 0);
+                byte[] bytes = NextProgramBytes(size, 0);
 
                 // Reserve room for the bytes and write them to the stack.
                 memory.Reserve(size, sp);
-                memory.WriteBytes(sp, sp + size, bits);
+                memory.WriteBytes(sp, sp + size, bytes);
 
                 MoveStackPointer(size);
             }
@@ -248,7 +248,7 @@ namespace SVM
                 // Get cache.
                 byte[] cache = caches.GetCacheOfSize(size, 0);
 
-                // Read bits from the stack.
+                // Read bytes from the stack.
                 memory.ReadBytes(sp - size, sp, cache);
 
                 Debug.Assert(registerCapacity >= size);
@@ -300,7 +300,7 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(addressBytes);
 
-                // Add address offset since next address bits could 
+                // Add address offset since next address bytes could 
                 // point to the same memory area.
                 byte[] cache = caches.GetCacheOfSize(valueSize, 1);
 
@@ -322,7 +322,7 @@ namespace SVM
                 byte[] addressBytes = caches.GetCacheOfSize(size, 0);
                 byte[] valueBytes = caches.GetCacheOfSize(size, 1);
 
-                // Read address bits to given cache.
+                // Read address bytes to given cache.
                 memory.ReadBytes(addressRegister, addressRegister + addressRegisterCapacity, addressBytes);
 
                 int address = ByteHelper.ToInt(addressBytes);
@@ -590,6 +590,7 @@ namespace SVM
                 memory.ReadBytes(sp - size, sp, aCache);
                 memory.ReadBytes(register, register + registerCapacity, bCache);
 
+                // TODO: is this moving really needed? Can't say at this time.. (29.7.2015 - 5:27).
                 MoveStackPointer(-size);
 
                 mathFunctions[memory.ReadByte(Registers.FLAGS) - 1](aCache, bCache, rCache);
@@ -597,6 +598,7 @@ namespace SVM
                 memory.Reserve(size, sp);
                 memory.WriteBytes(sp, sp + size, rCache);
 
+                // TODO: is this moving really needed? Can't say at this time.. (29.7.2015 - 5:27).
                 MoveStackPointer(size);
             }
             else if (bytecode == Bytecodes.Math_DirectStackRegister_Register)
