@@ -146,7 +146,7 @@ namespace SVMT
             // a - b..
             program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 10, 0);
             program1.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 15, 0);
-            program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.DIV);
             program1.AddBytes(Bytecodes.Math_DirectStack, Sizes.WORD, Sizes.WORD);
             program1.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.AA);
 
@@ -170,7 +170,7 @@ namespace SVMT
 
                 // Add direct stack.
                 ByteCodeProgram program1 = new ByteCodeProgram();
-                program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+                program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.DIV);
                 program1.AddBytes(Bytecodes.Load, Registers.BB, Sizes.LWORD, Math.Min(lbs1, lbs2), 0, 0, 0);
                 program1.AddBytes(Bytecodes.Load, Registers.AB, Sizes.LWORD, Math.Max(lbs1, lbs2), 0, 0, 0);
                 program1.AddBytes(Bytecodes.Math_IndirectRegister_Stack, Registers.AB, Registers.BB);
@@ -192,7 +192,7 @@ namespace SVMT
 
             program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD).AddValue(1000, 2);
             program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.DIV);
 
             for (int i = 0; i < 1000; i++)
             {
@@ -214,7 +214,7 @@ namespace SVMT
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1000, 2);
             program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.DIV);
 
             for (int i = 0; i < 1000; i++)
             {
@@ -239,7 +239,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD).AddValue(1, 2);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1000, 2);
 
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.DIV);
 
             for (int i = 0; i < 1000; i++)
             {

@@ -164,27 +164,6 @@ namespace SVM
         }
         #endregion
 
-        /// <summary>
-        /// Should be called before any programs are executed.
-        /// Resets the state of registers and memory of
-        /// the machine.
-        /// </summary>
-        public void Initialize()
-        {
-            memory.Clear();
-            caches.ClearCaches();
-
-            // Stack pointer should start from register 
-            // high address since registers live below this 
-            // address.
-            sp = Registers.HighAddress;
-
-            // Reset pc and retpc registers.
-            pc = retpc = 0;
-
-            program = null;
-        }
-
         private bool InterpretBytecode(byte bytecode)
         {
             // TODO: bytecode masking to speed up the lookup.
@@ -519,7 +498,7 @@ namespace SVM
                 memory.ReadBytes(sp - aSize, sp, aCache);
                 memory.ReadBytes(sp - aSize - bSize, sp - aSize, bCache);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS) - 1](aCache, bCache, rCache);
+                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
                 MoveStackPointer(-(aSize + bSize));
 
@@ -543,7 +522,7 @@ namespace SVM
                 memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
                 memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS) - 1](aCache, bCache, rCache);
+                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
                 memory.Reserve(aRegisterCapacity, sp);
                 memory.WriteBytes(sp, sp + aRegisterCapacity, rCache);
@@ -571,7 +550,7 @@ namespace SVM
                 memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
                 memory.ReadBytes(rRegister, rRegister + rRegisterCapacity, rCache);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS) - 1](aCache, bCache, rCache);
+                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
                 memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
             }
@@ -593,7 +572,7 @@ namespace SVM
                 // TODO: is this moving really needed? Can't say at this time.. (29.7.2015 - 5:27).
                 MoveStackPointer(-size);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS) - 1](aCache, bCache, rCache);
+                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
                 memory.Reserve(size, sp);
                 memory.WriteBytes(sp, sp + size, rCache);
@@ -711,6 +690,27 @@ namespace SVM
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Should be called before any programs are executed.
+        /// Resets the state of registers and memory of
+        /// the machine.
+        /// </summary>
+        public void Initialize()
+        {
+            memory.Clear();
+            caches.ClearCaches();
+
+            // Stack pointer should start from register 
+            // high address since registers live below this 
+            // address.
+            sp = Registers.HighAddress;
+
+            // Reset pc and retpc registers.
+            pc = retpc = 0;
+
+            program = null;
         }
 
         public void DumpStack()
