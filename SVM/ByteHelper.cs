@@ -92,9 +92,6 @@ namespace SVM
         private static readonly int[] bIntCache = new int[1];
         #endregion
 
-        private static readonly byte[] HWORDONE = new byte[1] { 1 };
-        private static readonly byte[] WORDONE = new byte[2] { 1, 0 };
-        private static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
         private static readonly byte[] DWORDONE = new byte[8] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
         /// <summary>
@@ -216,18 +213,9 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Negate(byte[] bytes)
         {
-            /*
-            int num = ByteHelper.ToInt(bytes);
-            num = ~num;
-
-            num++;
-
-            ByteHelper.ToBytes(num, bytes);
-            */
-
             for (int i = 0; i < bytes.Length; i++) bytes[i] = (byte)~bytes[i];
 
-            ByteHelper.AddBytes(bytes, ByteHelper.GetOneByteArray((byte)bytes.Length), bytes);
+            ByteHelper.AddBytes(bytes, DWORDONE, bytes);
         }
 
         public static string ToBinaryString(byte[] bytes)
@@ -240,63 +228,6 @@ namespace SVM
 			}
 
             return result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte[] GetOneByteArray(byte size)
-        {
-            // Clear all other bytes and toggle the first one,
-            // array could be dirty..
-
-            // TODO: fix this in some other way, maybe create a custom readonly array?
-
-            #region Old (no allocs)
-
-            if (size == Sizes.HWORD)
-            {
-                HWORDONE[0] = 1;
-
-                return HWORDONE;
-            }
-            else if (size == Sizes.WORD)
-            {
-                WORDONE[0] = 1;
-                WORDONE[1] = 0;
-
-                return WORDONE;
-            }
-            else if (size == Sizes.LWORD)
-            {
-                LWORDONE[0] = 1;
-                LWORDONE[1] = 0;
-                LWORDONE[2] = 0;
-                LWORDONE[3] = 0;
-                
-                return LWORDONE;
-            }
-            else if (size == Sizes.DWORD)
-            {
-                DWORDONE[0] = 1;
-                DWORDONE[1] = 0;
-                DWORDONE[2] = 0;
-                DWORDONE[3] = 0;
-                DWORDONE[4] = 0;
-                DWORDONE[5] = 0;
-                DWORDONE[6] = 0;
-                DWORDONE[7] = 0;
-
-                return DWORDONE;
-            }
-
-            return DWORDONE;
-
-            #endregion
-
-            /*byte[] bytes = new byte[size];
-            
-            bytes[0] = 1;
-
-            return bytes;*/
         }
     }
 }

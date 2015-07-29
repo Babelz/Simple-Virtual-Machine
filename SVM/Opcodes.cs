@@ -17,7 +17,7 @@ namespace SVM
 
         /*
          * Stack operations.
-         * Mask is 1000 0000 (255).
+         * Mask is 1000 0000 (128).
          */
         #region
 
@@ -136,7 +136,7 @@ namespace SVM
 
         /*
          * Register operations.
-         * 0001 0000 (16).
+         * 0001 0000 (32).
          */
         #region
 
@@ -172,7 +172,7 @@ namespace SVM
 
         /*
          * Arithmetic operations
-         * 1100 0000 (192).
+         * 11000 0000
          */
         #region
 
@@ -181,63 +181,73 @@ namespace SVM
         /// 
         /// add [size (word)] [size (word)]
         /// </summary>
-        public const byte Add_DirectStack = 0x0D0;
+        public const byte Add_DirectStack = 0x0000;
 
         /// <summary>
         /// Add two register values together and store result on the stack.
         /// 
         /// add [register_a] [register_b]
         /// </summary>
-        public const byte Add_IndirectRegister_Stack = 0x00D1;
+        public const byte Add_IndirectRegister_Stack = 0x0001;
         
         /// <summary>
         /// Add two register values together and store result to given register.
         /// 
         /// add [register_a] [register_b] [result register]
         /// </summary>
-        public const byte Add_IndirectRegister_Register = 0x00D2;
+        public const byte Add_IndirectRegister_Register = 0x0002;
 
         /// <summary>
         /// Add top of the stack and a register value together. Stores result to the stack.
         /// 
         /// add [size (word)] [register]
         /// </summary>
-        public const byte Add_DirectStackRegister_Stack = 0x00D3;
+        public const byte Add_DirectStackRegister_Stack = 0x0003;
 
         /// <summary>
         /// Add top of the stack and a register value together. Stores result to the given register.
         /// 
         /// add [size (word)] [register_a] [result register]
         /// </summary>
-        public const byte Add_DirectStackRegister_Register = 0x00D4;
+        public const byte Add_DirectStackRegister_Register = 0x0004;
+
+        public const byte Sub_DirectStack = 0x0005;
+
+        public const byte Sub_IndirectRegister_stack = 0x0006;
+
+        public const byte Sub_IndirectRegister_Register = 0x0007;
+
+        public const byte Sub_DirectStackRegister_Stack = 0x0008;
+
+        public const byte Sub_DirectStackRegister_Register = 0x0009;
 
         /// <summary>
         /// Increase given registers value by one.
         /// 
         /// increg [register address]
         /// </summary>
-        public const byte Inc_Reg = 0x00D5;
+        public const byte Inc_Reg = 0x000A;
         
         /// <summary>
         /// Increase top value of the stack by one.
         /// 
         /// incstack [size (word)]
         /// </summary>
-        public const byte Inc_Stack = 0x00D6;
+        public const byte Inc_Stack = 0x000B;
 
         /// <summary>
         /// Decrease given registers value by one.
         /// 
         /// decreg [register address]
         /// </summary>
-        public const byte Dec_Reg = 0x00D7;
+        public const byte Dec_Reg = 0x000C;
         
         /// <summary>
         /// Decrease top value of the stack by one.
         /// 
         /// decstack [size (word)]
         /// </summary>
-        public const byte Dec_Stack = 0x00D8;
+        public const byte Dec_Stack = 0x000D;
         #endregion
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -259,11 +269,6 @@ namespace SVM
         public static bool IsRegisterOperation(byte bytecode)
         {
             return ((bytecode >> 4) & 1) == 1;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsArithmeticOperation(byte bytecode)
-        {
-            return (((bytecode >> 7) & 1) == 1 && ((bytecode >> 6) & 1) == 1);
         }
     }
 }

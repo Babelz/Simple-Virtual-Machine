@@ -149,18 +149,22 @@ namespace SVM
         /// <summary>
         /// Clears all caches.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearCaches()
         {
-            for (int i = 0; i < transitionTable.Length; i++) transitionTable[i].Initialize();
+            for (int i = 0; i < transitionTable.Length; i++) ClearCache(i, 0);
         }
         /// <summary>
         /// Clears given size cache at given offset.
         /// </summary>
         /// <param name="size">cache to clear</param>
         /// <param name="offset">address offset</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearCache(int size, int offset)
         {
-            transitionTable[size + offset].Initialize();
+            byte[] cache = GetCacheOfSize(size, offset);
+
+            for (int i = 0; i < cache.Length; i++) cache[i] = 0;
         }
 
         /// <summary>

@@ -183,189 +183,7 @@ namespace SVM
             // 2) find opcode
             // 3) execute it
 
-            if (Bytecodes.IsArithmeticOperation(bytecode))
-            {
-                #region Arithmetic operations
-
-                if (bytecode == Bytecodes.Add_DirectStack)
-                {
-                    byte aSize = NextProgramByte();
-                    byte bSize = NextProgramByte();
-
-                    byte[] aCache = caches.GetCacheOfSize(aSize, 0);
-                    byte[] bCache = caches.GetCacheOfSize(bSize, 1);
-                    byte[] rCache = caches.GetCacheOfSize(aSize, 2);
-
-                    memory.ReadBytes(sp - aSize, sp, aCache);
-                    memory.ReadBytes(sp - aSize - bSize, sp - aSize, bCache);
-
-                    ByteHelper.AddBytes(aCache, bCache, rCache);
-
-                    MoveStackPointer(-(aSize + bSize));
-
-                    memory.Reserve(aSize, sp);
-                    memory.WriteBytes(sp, sp + aSize, rCache);
-
-                    MoveStackPointer(aSize);
-                }
-                else if (bytecode == Bytecodes.Add_IndirectRegister_Stack)
-                {
-                    byte aRegister = NextProgramByte();
-                    byte bRegister = NextProgramByte();
-
-                    byte aRegisterCapacity = Registers.RegisterSize(aRegister);
-                    byte bRegisterCapacity = Registers.RegisterSize(bRegister);
-
-                    byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
-                    byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
-                    byte[] rCache = caches.GetCacheOfSize(aRegisterCapacity, 2);
-
-                    memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
-                    memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
-
-                    ByteHelper.AddBytes(aCache, bCache, rCache);
-
-                    memory.Reserve(aRegisterCapacity, sp);
-                    memory.WriteBytes(sp, sp + aRegisterCapacity, rCache);
-
-                    MoveStackPointer(aRegisterCapacity);
-                }
-                else if (bytecode == Bytecodes.Add_IndirectRegister_Register)
-                {
-                    byte aRegister = NextProgramByte();
-                    byte bRegister = NextProgramByte();
-                    byte rRegister = NextProgramByte();
-
-                    byte aRegisterCapacity = Registers.RegisterSize(aRegister);
-                    byte bRegisterCapacity = Registers.RegisterSize(bRegister);
-                    byte rRegisterCapacity = Registers.RegisterSize(rRegister);
-
-                    // Just get the main cache for the result, this should 
-                    // not be in use at this point.
-                    byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
-                    byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
-                    byte[] rCache = caches.GetCache(CacheManager.M_CACHE);
-
-                    // Copy data to caches.
-                    memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
-                    memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
-                    memory.ReadBytes(rRegister, rRegister + rRegisterCapacity, rCache);
-
-                    ByteHelper.AddBytes(aCache, bCache, rCache);
-
-                    memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
-                }
-                else if (bytecode == Bytecodes.Add_DirectStackRegister_Stack)
-                {
-                    byte size = NextProgramByte();
-                    byte register = NextProgramByte();
-
-                    byte registerCapacity = Registers.RegisterSize(register);
-
-                    // Copy data to caches.
-                    byte[] aCache = caches.GetCacheOfSize(size, 0);
-                    byte[] bCache = caches.GetCacheOfSize(size, 1);
-                    byte[] rCache = caches.GetCacheOfSize(size, 2);
-
-                    memory.ReadBytes(sp - size, sp, aCache);
-                    memory.ReadBytes(register, register + registerCapacity, bCache);
-
-                    MoveStackPointer(-size);
-
-                    ByteHelper.AddBytes(aCache, bCache, rCache);
-
-                    memory.Reserve(size, sp);
-                    memory.WriteBytes(sp, sp + size, rCache);
-
-                    MoveStackPointer(size);
-                }
-                else if (bytecode == Bytecodes.Add_DirectStackRegister_Register)
-                {
-                    // Get the size.
-                    byte size = program[pc + 1];
-                    byte register = program[pc + 3];
-
-                    // Dirty hack optimizations?
-                    // TODO: see if some of the add variants can be
-                    //       done the same way.
-                    bytecode = Bytecodes.Add_DirectStackRegister_Stack;
-                    InterpretBytecode(bytecode);
-
-                    // Copy the result to given cache.
-                    byte[] cache = caches.GetCacheOfSize(size, 0);
-                    memory.ReadBytes(sp - size, sp, cache);
-
-                    memory.WriteBytes(register, register + size, cache);
-
-                    // Clear stack from earlier calls.
-                    memory.Clear(sp - size, size);
-
-                    MoveStackPointer(-size);
-
-                    // Before this, we are pointing to this opcodes last argument.
-                    MoveProgramCounter(1);
-                }
-                else if (bytecode == Bytecodes.Inc_Reg)
-                {
-                    byte register = NextProgramByte();
-                    byte size = Registers.RegisterSize(register);
-
-                    byte[] cache = caches.GetCacheOfSize(size, 0);
-                    byte[] rCache = caches.GetCacheOfSize(size, 1);
-
-                    memory.ReadBytes(register, register + size, cache);
-
-                    ByteHelper.AddBytes(cache, ByteHelper.GetOneByteArray(size), rCache);
-
-                    memory.WriteBytes(register, register + size, rCache);
-
-
-                    Console.WriteLine(ByteHelper.ToInt(rCache));
-                }
-                else if (bytecode == Bytecodes.Inc_Stack)
-                {
-                    byte size = NextProgramByte();
-
-                    byte[] cache = caches.GetCacheOfSize(size, 0);
-                    byte[] rCache = caches.GetCacheOfSize(size, 1);
-
-                    memory.ReadBytes(sp - size, sp, cache);
-
-                    ByteHelper.AddBytes(cache, ByteHelper.GetOneByteArray(size), rCache);
-
-                    memory.WriteBytes(sp - size, sp, rCache);
-                }
-                else if (bytecode == Bytecodes.Dec_Reg)
-                {
-                    byte register = NextProgramByte();
-                    byte size = Registers.RegisterSize(register);
-
-                    byte[] cache = caches.GetCacheOfSize(size, 0);
-                    byte[] rCache = caches.GetCacheOfSize(size, 1);
-
-                    memory.ReadBytes(register, register + size, cache);
-
-                    ByteHelper.SubtractBytes(cache, ByteHelper.GetOneByteArray(size), rCache);
-
-                    memory.WriteBytes(register, register + size, rCache);
-                }
-                else if (bytecode == Bytecodes.Dec_Stack)
-                {
-                    byte size = NextProgramByte();
-
-                    byte[] cache = caches.GetCacheOfSize(size, 0);
-                    byte[] rCache = caches.GetCacheOfSize(size, 1);
-
-                    memory.ReadBytes(sp - size, sp, cache);
-
-                    ByteHelper.SubtractBytes(cache, ByteHelper.GetOneByteArray(size), rCache);
-
-                    memory.WriteBytes(sp - size, sp, rCache);
-                }
-
-                #endregion
-            }
-            else if (Bytecodes.IsStackOperation(bytecode))
+            if (Bytecodes.IsStackOperation(bytecode))
             {
                 #region Stack operations
 
@@ -447,6 +265,79 @@ namespace SVM
                     ByteHelper.ToBytes(sp, cache);
 
                     memory.WriteBytes(register, register + 4, cache);
+                }
+
+                #endregion
+            }
+            else if (Bytecodes.IsRegisterOperation(bytecode))
+            {
+                #region Register operations
+
+                if (bytecode == Bytecodes.Load)
+                {
+                    byte register = NextProgramByte();
+                    byte size = NextProgramByte();
+                    byte[] bytes = NextProgramBytes(size, 0);
+
+                    byte registerCapacity = Registers.RegisterSize(register);
+
+                    Debug.Assert(registerCapacity >= size);
+
+                    memory.WriteBytes(register, register + size, bytes);
+                }
+                else if (bytecode == Bytecodes.CopyStack_Direct)
+                {
+                    byte register = NextProgramByte();
+                    byte valueSize = NextProgramByte();
+                    byte addressSize = NextProgramByte();
+                    byte[] addressBytes = NextProgramBytes(valueSize, 0);
+
+                    byte registerCapacity = Registers.RegisterSize(register);
+
+                    Debug.Assert(registerCapacity >= valueSize);
+
+                    int address = ByteHelper.ToInt(addressBytes);
+
+                    // Add address offset since next address bits could 
+                    // point to the same memory area.
+                    byte[] cache = caches.GetCacheOfSize(valueSize, 1);
+
+                    // Copy memory to given cache.
+                    memory.ReadBytes(address, address + valueSize, cache);
+
+                    // Copy value from the stack to given register.
+                    memory.WriteBytes(register, register + registerCapacity, cache);
+                }
+                else if (bytecode == Bytecodes.CopyStack_IndirectRegister)
+                {
+                    byte size = NextProgramByte();
+                    byte addressRegister = NextProgramByte();
+                    byte targetRegister = NextProgramByte();
+
+                    byte targetRegisterCapacity = Registers.RegisterSize(targetRegister);
+                    byte addressRegisterCapacity = Registers.RegisterSize(addressRegister);
+
+                    byte[] addressBytes = caches.GetCacheOfSize(size, 0);
+                    byte[] valueBytes = caches.GetCacheOfSize(size, 1);
+
+                    // Read address bits to given cache.
+                    memory.ReadBytes(addressRegister, addressRegister + addressRegisterCapacity, addressBytes);
+
+                    int address = ByteHelper.ToInt(addressBytes);
+
+                    Debug.Assert(address >= Registers.LowAddress && address < Registers.HighAddress);
+                    Debug.Assert(targetRegisterCapacity >= size);
+
+                    // Copy value from the stack to given register.
+                    memory.ReadBytes(sp - size, sp, valueBytes);
+                    memory.WriteBytes(targetRegister, targetRegister + targetRegisterCapacity, valueBytes);
+                }
+                else if (bytecode == Bytecodes.Clear)
+                {
+                    byte register = NextProgramByte();
+                    byte registerCapacity = Registers.RegisterSize(register);
+
+                    memory.Clear(register, register + registerCapacity);
                 }
 
                 #endregion
@@ -592,88 +483,218 @@ namespace SVM
 
                 #endregion
             }
-            else if (Bytecodes.IsRegisterOperation(bytecode))
+            else
             {
-                #region Register operations
+                // Arithmetic operations dont have flagged bits 
+                // cause system limitations. This could be 
+                // fixed using the flag register, but 
+                // i dont see this as an issue.
 
-                if (bytecode == Bytecodes.Load)
+                #region Arithmetic operations
+
+                if (bytecode == Bytecodes.Add_DirectStack)
                 {
-                    byte register = NextProgramByte();
+                    byte aSize = NextProgramByte();
+                    byte bSize = NextProgramByte();
+
+                    byte[] aCache = caches.GetCacheOfSize(aSize, 0);
+                    byte[] bCache = caches.GetCacheOfSize(bSize, 1);
+                    byte[] rCache = caches.GetCacheOfSize(aSize, 2);
+
+                    memory.ReadBytes(sp - aSize, sp, aCache);
+                    memory.ReadBytes(sp - aSize - bSize, sp - aSize, bCache);
+
+                    ByteHelper.AddBytes(aCache, bCache, rCache);
+
+                    MoveStackPointer(-(aSize + bSize));
+
+                    memory.Reserve(aSize, sp);
+                    memory.WriteBytes(sp, sp + aSize, rCache);
+
+                    MoveStackPointer(aSize);
+                }
+                else if (bytecode == Bytecodes.Add_IndirectRegister_Stack)
+                {
+                    byte aRegister = NextProgramByte();
+                    byte bRegister = NextProgramByte();
+
+                    byte aRegisterCapacity = Registers.RegisterSize(aRegister);
+                    byte bRegisterCapacity = Registers.RegisterSize(bRegister);
+
+                    byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
+                    byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
+                    byte[] rCache = caches.GetCacheOfSize(aRegisterCapacity, 2);
+
+                    memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
+                    memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
+
+                    ByteHelper.AddBytes(aCache, bCache, rCache);
+
+                    memory.Reserve(aRegisterCapacity, sp);
+                    memory.WriteBytes(sp, sp + aRegisterCapacity, rCache);
+
+                    MoveStackPointer(aRegisterCapacity);
+                }
+                else if (bytecode == Bytecodes.Add_IndirectRegister_Register)
+                {
+                    byte aRegister = NextProgramByte();
+                    byte bRegister = NextProgramByte();
+                    byte rRegister = NextProgramByte();
+
+                    byte aRegisterCapacity = Registers.RegisterSize(aRegister);
+                    byte bRegisterCapacity = Registers.RegisterSize(bRegister);
+                    byte rRegisterCapacity = Registers.RegisterSize(rRegister);
+
+                    // Just get the main cache for the result, this should 
+                    // not be in use at this point.
+                    byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
+                    byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
+                    byte[] rCache = caches.GetCache(CacheManager.M_CACHE);
+
+                    // Copy data to caches.
+                    memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
+                    memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
+                    memory.ReadBytes(rRegister, rRegister + rRegisterCapacity, rCache);
+
+                    ByteHelper.AddBytes(aCache, bCache, rCache);
+
+                    memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
+                }
+                else if (bytecode == Bytecodes.Add_DirectStackRegister_Stack)
+                {
                     byte size = NextProgramByte();
-                    byte[] bytes = NextProgramBytes(size, 0);
+                    byte register = NextProgramByte();
 
                     byte registerCapacity = Registers.RegisterSize(register);
 
-                    Debug.Assert(registerCapacity >= size);
+                    // Copy data to caches.
+                    byte[] aCache = caches.GetCacheOfSize(size, 0);
+                    byte[] bCache = caches.GetCacheOfSize(size, 1);
+                    byte[] rCache = caches.GetCacheOfSize(size, 2);
 
-                    memory.WriteBytes(register, register + size, bytes);
+                    memory.ReadBytes(sp - size, sp, aCache);
+                    memory.ReadBytes(register, register + registerCapacity, bCache);
+
+                    MoveStackPointer(-size);
+
+                    ByteHelper.AddBytes(aCache, bCache, rCache);
+
+                    memory.Reserve(size, sp);
+                    memory.WriteBytes(sp, sp + size, rCache);
+
+                    MoveStackPointer(size);
                 }
-                else if (bytecode == Bytecodes.CopyStack_Direct)
+                else if (bytecode == Bytecodes.Add_DirectStackRegister_Register)
+                {
+                    // Get the size.
+                    byte size = program[pc + 1];
+                    byte register = program[pc + 3];
+
+                    // Dirty hack optimizations?
+                    // TODO: see if some of the add variants can be
+                    //       done the same way.
+                    bytecode = Bytecodes.Add_DirectStackRegister_Stack;
+                    InterpretBytecode(bytecode);
+
+                    // Copy the result to given cache.
+                    byte[] cache = caches.GetCacheOfSize(size, 0);
+                    memory.ReadBytes(sp - size, sp, cache);
+
+                    memory.WriteBytes(register, register + size, cache);
+
+                    // Clear stack from earlier calls.
+                    memory.Clear(sp - size, size);
+
+                    MoveStackPointer(-size);
+
+                    // Before this, we are pointing to this opcodes last argument.
+                    MoveProgramCounter(1);
+                }
+                else if (bytecode == Bytecodes.Inc_Reg)
                 {
                     byte register = NextProgramByte();
-                    byte valueSize = NextProgramByte();
-                    byte addressSize = NextProgramByte();
-                    byte[] addressBytes = NextProgramBytes(valueSize, 0);
+                    byte size = Registers.RegisterSize(register);
 
-                    byte registerCapacity = Registers.RegisterSize(register);
+                    byte[] cache = caches.GetCacheOfSize(size, 0);
+                    byte[] rCache = caches.GetCacheOfSize(size, 1);
+                    byte[] tCache = caches.GetCacheOfSize(size, 2);
 
-                    Debug.Assert(registerCapacity >= valueSize);
+                    caches.ClearCache(size, 2);
+                    tCache[0] = 1;
 
-                    int address = ByteHelper.ToInt(addressBytes);
+                    memory.ReadBytes(register, register + size, cache);
 
-                    // Add address offset since next address bits could 
-                    // point to the same memory area.
-                    byte[] cache = caches.GetCacheOfSize(valueSize, 1);
+                    ByteHelper.AddBytes(cache, tCache, rCache);
 
-                    // Copy memory to given cache.
-                    memory.ReadBytes(address, address + valueSize, cache);
+                    memory.WriteBytes(register, register + size, rCache);
 
-                    // Copy value from the stack to given register.
-                    memory.WriteBytes(register, register + registerCapacity, cache);
+
+                    Console.WriteLine(ByteHelper.ToInt(rCache));
                 }
-                else if (bytecode == Bytecodes.CopyStack_IndirectRegister)
+                else if (bytecode == Bytecodes.Inc_Stack)
                 {
                     byte size = NextProgramByte();
-                    byte addressRegister = NextProgramByte();
-                    byte targetRegister = NextProgramByte();
 
-                    byte targetRegisterCapacity = Registers.RegisterSize(targetRegister);
-                    byte addressRegisterCapacity = Registers.RegisterSize(addressRegister);
+                    byte[] cache = caches.GetCacheOfSize(size, 0);
+                    byte[] rCache = caches.GetCacheOfSize(size, 1);
+                    byte[] tCache = caches.GetCacheOfSize(size, 2);
 
-                    byte[] addressBytes = caches.GetCacheOfSize(size, 0);
-                    byte[] valueBytes = caches.GetCacheOfSize(size, 1);
+                    caches.ClearCache(size, 2);
+                    tCache[0] = 1;
 
-                    // Read address bits to given cache.
-                    memory.ReadBytes(addressRegister, addressRegister + addressRegisterCapacity, addressBytes);
+                    memory.ReadBytes(sp - size, sp, cache);
 
-                    int address = ByteHelper.ToInt(addressBytes);
+                    ByteHelper.AddBytes(cache, tCache, rCache);
 
-                    Debug.Assert(address >= Registers.LowAddress && address < Registers.HighAddress);
-                    Debug.Assert(targetRegisterCapacity >= size);
-
-                    // Copy value from the stack to given register.
-                    memory.ReadBytes(sp - size, sp, valueBytes);
-                    memory.WriteBytes(targetRegister, targetRegister + targetRegisterCapacity, valueBytes);
+                    memory.WriteBytes(sp - size, sp, rCache);
                 }
-                else if (bytecode == Bytecodes.Clear)
+                else if (bytecode == Bytecodes.Dec_Reg)
                 {
                     byte register = NextProgramByte();
-                    byte registerCapacity = Registers.RegisterSize(register);
+                    byte size = Registers.RegisterSize(register);
 
-                    memory.Clear(register, register + registerCapacity);
+                    byte[] cache = caches.GetCacheOfSize(size, 0);
+                    byte[] rCache = caches.GetCacheOfSize(size, 1);
+                    byte[] tCache = caches.GetCacheOfSize(size, 2);
+
+                    caches.ClearCache(size, 2);
+                    tCache[0] = 1;
+
+                    memory.ReadBytes(register, register + size, cache);
+
+                    ByteHelper.SubtractBytes(cache, tCache, rCache);
+
+                    memory.WriteBytes(register, register + size, rCache);
+                }
+                else if (bytecode == Bytecodes.Dec_Stack)
+                {
+                    byte size = NextProgramByte();
+
+                    byte[] cache = caches.GetCacheOfSize(size, 0);
+                    byte[] rCache = caches.GetCacheOfSize(size, 1);
+                    byte[] tCache = caches.GetCacheOfSize(size, 2);
+
+                    caches.ClearCache(size, 2);
+                    tCache[0] = 1;
+
+                    memory.ReadBytes(sp - size, sp, cache);
+
+                    ByteHelper.SubtractBytes(cache, tCache, rCache);
+
+                    memory.WriteBytes(sp - size, sp, rCache);
+                }
+                // Invalid bytecode.
+                else
+                {
+                    memory.Reserve(1, sp);
+                    memory.WriteByte(sp, ReturnCodes.PC_CORRUPTED_OR_NOT_OPCODE);
+
+                    sp++;
+
+                    return false;
                 }
 
                 #endregion
-            }
-            else
-            {
-                // Invalid opecode masking.
-                memory.Reserve(1, sp);
-                memory.WriteByte(sp, ReturnCodes.PC_CORRUPTED_OR_NOT_OPCODE);
-
-                sp++;
-
-                return false;
             }
 
             return true;
