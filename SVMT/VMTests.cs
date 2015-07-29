@@ -196,13 +196,13 @@ namespace SVMT
 
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Bytecodes.Math_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.CA);
+                program.AddBytes(Bytecodes.Math_IndirectRegister_Register, Registers.AA, Registers.BA, Registers.AA);
             }
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            int result = svm.ReadRegisterValue(Registers.CA);
+            int result = svm.ReadRegisterValue(Registers.AA);
 
             Assert.AreEqual(0, result);
         }
@@ -216,7 +216,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
             program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 program.AddBytes(Bytecodes.Math_DirectStackRegister_Stack, Sizes.WORD, Registers.AA);
             }
@@ -241,9 +241,10 @@ namespace SVMT
 
             program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 program.AddBytes(Bytecodes.Math_DirectStackRegister_Register, Sizes.WORD, Registers.BA, Registers.CA);
+                program.AddBytes(Bytecodes.Push_IndirectRegister, Registers.CA);
             }
 
             svm.Initialize();

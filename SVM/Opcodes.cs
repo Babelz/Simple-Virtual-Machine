@@ -21,13 +21,11 @@ namespace SVM
         #region
 
         /// <summary>
-        /// Code 128
         /// push [bytes count] [bytes]
         /// </summary>
         public const byte Push_Direct = 0x0080;
 
         /// <summary>
-        /// Code 129
         /// push [register address] 
         /// 
         /// Size of the value depends on the size of the register.
@@ -35,13 +33,11 @@ namespace SVM
         public const byte Push_IndirectRegister = 0x0081;
 
         /// <summary>
-        /// Code 130
         /// pop [bytes count]
         /// </summary>
         public const byte Pop = 0x0082;
 
         /// <summary>
-        /// Code 131
         /// top [bytes count] [register address] 
         ///
         /// Copies the given amount of bytes from the top of the stack to the given register.
@@ -49,7 +45,6 @@ namespace SVM
         public const byte Top = 0x0083;
 
         /// <summary>
-        /// Code 132
         /// sp [register address]
         /// 
         /// Saves stack pointers current address to given register.

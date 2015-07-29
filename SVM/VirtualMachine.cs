@@ -564,7 +564,7 @@ namespace SVM
                 // not be in use at this point.
                 byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
                 byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
-                byte[] rCache = caches.GetCache(CacheManager.M_CACHE);
+                byte[] rCache = caches.GetCacheOfSize(rRegisterCapacity, 2);
 
                 // Copy data to caches.
                 memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
