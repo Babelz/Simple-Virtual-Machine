@@ -64,6 +64,8 @@ namespace SVM
         /// function calls.
         /// </summary>
         private int retpc;
+
+        private bool running;
         #endregion
 
         #region Properties
@@ -174,16 +176,29 @@ namespace SVM
             byte addressSize = NextProgramByte();
             byte[] addressBytes = NextProgramBytes(addressSize, 0);
 
-            byte[] stackCache = caches.GetCacheOfSize(stackSize, 1);
+            byte[] cache = caches.GetCacheOfSize(stackSize, 1);
 
-            memory.ReadBytes(sp - stackSize, sp, stackCache);
+            // Validation.
+            if (!IsValidWordSize(stackSize)) return;
+            if (!IsValidWordSize(addressSize)) return;
 
-            int value = ByteHelper.ToInt(stackCache);
+            // Read value from stack.
+            memory.ReadBytes(sp - stackSize, sp, cache);
 
+            int value = ByteHelper.ToInt(cache);
+
+            // Do testing.
             if (condition(value))
             {
                 // Set pc to given address.
                 int address = ByteHelper.ToInt(addressBytes);
+
+                if (address > program.Length || address < 0)
+                {
+                    Exit(ReturnCodes.INVALID_JUMP_ADDRESS);
+
+                    return;
+                }
 
                 pc = address - 1;
             }
@@ -196,6 +211,11 @@ namespace SVM
             byte bSize = NextProgramByte();
             byte addressSize = NextProgramByte();
             byte[] addressBytes = NextProgramBytes(addressSize, 0);
+
+            // Validation.
+            if (!IsValidWordSize(aSize)) return;
+            if (!IsValidWordSize(bSize)) return;
+            if (!IsValidWordSize(addressSize)) return;
 
             byte[] aCache = caches.GetCacheOfSize(aSize, 1);
             byte[] bCache = caches.GetCacheOfSize(bSize, 2);
@@ -210,13 +230,71 @@ namespace SVM
             {
                 int address = ByteHelper.ToInt(addressBytes);
 
+                if (address > program.Length || address < 0)
+                {
+                    Exit(ReturnCodes.INVALID_JUMP_ADDRESS);
+
+                    return;
+                }
+
                 pc = address - 1;
             }
         }
 
-        private bool InterpretBytecode(byte bytecode)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Print(byte[] flags, byte[] values, int count)
         {
-            // TODO: bytecode masking to speed up the lookup.
+            if (flags[0] == Flags.STR)
+            {
+                string str = Convert.ToBase64String(values, 0, count);
+
+                Console.WriteLine(str);
+            }
+            else if (flags[0] == Flags.NUM)
+            {
+                byte[] valueCache = caches.GetCacheOfSize(count, 2);
+
+                Array.Copy(values, 0, valueCache, 0, valueCache.Length);
+
+                int value = ByteHelper.ToInt(valueCache);
+
+                Console.WriteLine(value);
+            }
+            else
+            {
+                // Exit.
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsValidWordSize(int size)
+        {
+            if (size > Sizes.LWORD || size == 0)
+            {
+                Exit(ReturnCodes.INVALID_WORD_SIZE);
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private void Exit(byte exitCode)
+        {
+            running = false;
+
+            memory.WriteByte(sp, exitCode);
+
+            sp++;
+        }
+
+        private void InterpretBytecode(byte bytecode)
+        {
+            // Code execution steps
+            //      1) Read bytes from program memory
+            //      2) Validation
+            //      3) Get caches
+            //      4) Execute
 
             #region Stack operations
 
@@ -224,11 +302,9 @@ namespace SVM
             {
                 // Get size of the variable in bytes.
                 byte size = NextProgramByte();
-
-                Debug.Assert(size <= Sizes.DWORD);
-
-                // Read the variable values.
                 byte[] bytes = NextProgramBytes(size, 0);
+
+                if (!IsValidWordSize(size)) return;
 
                 memory.WriteBytes(sp, sp + size, bytes);
 
@@ -239,8 +315,6 @@ namespace SVM
                 // Read register address and get its size.
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterCapacity(register);
-
-                Debug.Assert(registerCapacity <= Sizes.DWORD);
 
                 // Get reusable buffer to store the bytes.
                 byte[] cache = caches.GetCacheOfSize(registerCapacity, 0);
@@ -255,10 +329,15 @@ namespace SVM
             }
             else if (bytecode == Bytecodes.Pop)
             {
-                Debug.Assert(sp > Registers.HighAddress);
-
                 // Get count of bytes to pop.
                 byte bytes = NextProgramByte();
+
+                if (sp - bytes <= StackLowAddress)
+                {
+                    Exit(ReturnCodes.STACK_UNDERFLOW);
+
+                    return;
+                }
 
                 // Everything after this address is trash.
                 MoveStackPointer(-(bytes + 1));
@@ -269,13 +348,21 @@ namespace SVM
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterCapacity(register);
 
+                // Validation.
+                if (!IsValidWordSize(size)) return;
+
+                if (size > registerCapacity)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
+
                 // Get cache.
                 byte[] cache = caches.GetCacheOfSize(size, 0);
 
                 // Read bytes from the stack.
                 memory.ReadBytes(sp - size, sp, cache);
-
-                Debug.Assert(registerCapacity >= size);
 
                 // Copy top of the stack to given register.
                 memory.WriteBytes(register, register + size, cache);
@@ -286,7 +373,12 @@ namespace SVM
                 byte registerCapacity = Registers.RegisterCapacity(register);
 
                 // Check that the stack pointer fits to this register.
-                Debug.Assert(registerCapacity >= 4);
+                if (registerCapacity < 4)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
 
                 // Get cache to store results.
                 byte[] cache = caches.GetCacheOfSize(Sizes.LWORD, 0);
@@ -297,8 +389,12 @@ namespace SVM
             else if (bytecode == Bytecodes.Push_Bytes)
             {
                 byte elementSize = NextProgramByte();
-                byte elementsSizeCount = NextProgramByte();
-                byte[] elementsCountBytes = NextProgramBytes(elementsSizeCount, 0);
+                byte elementsCountSize = NextProgramByte();
+                byte[] elementsCountBytes = NextProgramBytes(elementsCountSize, 0);
+
+                // Validation.
+                if (!IsValidWordSize(elementSize)) return;
+                if (!IsValidWordSize(elementsCountSize)) return;
 
                 // Get elements count.
                 int elementsCount = ByteHelper.ToInt(elementsCountBytes);
@@ -322,7 +418,15 @@ namespace SVM
 
                 byte registerCapacity = Registers.RegisterCapacity(register);
 
-                Debug.Assert(registerCapacity >= size);
+                // Validation.
+                if (!IsValidWordSize(size)) return;
+
+                if (size > registerCapacity)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
 
                 memory.WriteBytes(register, register + size, bytes);
             }
@@ -330,10 +434,14 @@ namespace SVM
             {
                 byte register = NextProgramByte();
                 byte registerCapacity = Registers.RegisterCapacity(register);
-
                 byte[] bytes = NextProgramBytes(registerCapacity, 0);
 
-                Debug.Assert(registerCapacity >= bytes.Length);
+                if (registerCapacity != bytes.Length)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
 
                 memory.WriteBytes(register, register + bytes.Length, bytes);
             }
@@ -343,10 +451,18 @@ namespace SVM
                 byte valueSize = NextProgramByte();
                 byte addressSize = NextProgramByte();
                 byte[] addressBytes = NextProgramBytes(valueSize, 0);
-
                 byte registerCapacity = Registers.RegisterCapacity(register);
 
-                Debug.Assert(registerCapacity >= valueSize);
+                // Validation.
+                if (!IsValidWordSize(valueSize)) return;
+                if (!IsValidWordSize(addressSize)) return;
+
+                if (registerCapacity < valueSize)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
 
                 int address = ByteHelper.ToInt(addressBytes);
 
@@ -377,8 +493,21 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(addressBytes);
 
-                Debug.Assert(address >= Registers.LowAddress && address < Registers.HighAddress);
-                Debug.Assert(targetRegisterCapacity >= size);
+                // Validation.
+                if (!IsValidWordSize(size)) return;
+                
+                if (address < Registers.LowAddress || address > Registers.HighAddress)
+                {
+                    Exit(ReturnCodes.INVALID_REGISTER_ADDRESS);
+
+                    return;
+                }
+                if (targetRegisterCapacity < size)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
 
                 // Copy value from the stack to given register.
                 memory.ReadBytes(sp - size, sp, valueBytes);
@@ -398,11 +527,7 @@ namespace SVM
 
             else if (bytecode == Bytecodes.Abort)
             {
-                memory.WriteByte(sp, ReturnCodes.ABORT_CALLED);
-
-                MoveStackPointer(1);
-
-                return false;
+                Exit(ReturnCodes.ABORT_CALLED);
             }
             else if (bytecode == Bytecodes.Jez)
             {
@@ -431,6 +556,16 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(addressBytes);
 
+                // Validation.
+                if (!IsValidWordSize(addressSize)) return;
+
+                if (address > program.Length || address < 0)
+                {
+                    Exit(ReturnCodes.INVALID_JUMP_ADDRESS);
+
+                    return;
+                }
+
                 // One will be reduced from all jump addresses
                 // since we increase our pc by one after opcode
                 // has been executed.
@@ -444,6 +579,16 @@ namespace SVM
                 memory.ReadBytes(sp - size, sp, cache);
 
                 int address = ByteHelper.ToInt(cache);
+
+                // Validation.
+                if (!IsValidWordSize(size)) return;
+
+                if (address > program.Length || address < 0)
+                {
+                    Exit(ReturnCodes.INVALID_JUMP_ADDRESS);
+
+                    return;
+                }
 
                 pc = address - 1;
             }
@@ -462,6 +607,16 @@ namespace SVM
 
                 int bytesToClear = ByteHelper.ToInt(bytes);
 
+                // Validation.
+                if (!IsValidWordSize(size)) return;
+
+                if (sp - bytesToClear < StackLowAddress)
+                {
+                    Exit(ReturnCodes.STACK_UNDERFLOW);
+
+                    return;
+                }
+
                 memory.Clear(sp - bytesToClear, sp);
             }
             else if (bytecode == Bytecodes.PtrStack)
@@ -475,8 +630,16 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(addressBytes);
 
-                // TODO: could point anywhere in release build... Make this staph!
-                Debug.Assert(address >= Registers.HighAddress);
+                // Validation.
+                if (!IsValidWordSize(addressSize)) return;
+                if (!IsValidWordSize(valueSize)) return;
+
+                if (address <= StackLowAddress)
+                {
+                    Exit(ReturnCodes.ACCESSING_PROTECTED_MEMORY);
+
+                    return;
+                }
 
                 memory.WriteBytes(address, address + addressBytes.Length, valueBytes);
             }
@@ -494,9 +657,15 @@ namespace SVM
 
                 int address = ByteHelper.ToInt(bytes);
 
-                // TODO: could point anywhere... Make this staph!
+                // Validation.
+                if (!IsValidWordSize(size)) return;
 
-                Debug.Assert(address >= Registers.HighAddress);
+                if (address <= StackLowAddress)
+                {
+                    Exit(ReturnCodes.ACCESSING_PROTECTED_MEMORY);
+
+                    return;
+                }
 
                 memory.WriteBytes(address, address + bytes.Length, cache);
             }
@@ -529,19 +698,44 @@ namespace SVM
                 byte size = NextProgramByte();
                 byte[] bytesCountBytes = NextProgramBytes(size, 0);
 
+                // Validation.
+                if (!IsValidWordSize(size)) return;
+
                 int bytesCount = ByteHelper.ToInt(bytesCountBytes);
 
-                byte[] cache = caches.GetCache(CacheManager.M_CACHE);
+                byte[] bytesCache = caches.GetCache(CacheManager.M_CACHE);
                 byte[] flagsCache = caches.GetCacheOfSize(1, 1);
 
-                memory.ReadBytes(sp - bytesCount, sp, cache);
-
+                memory.ReadBytes(sp - bytesCount, sp, bytesCache);
                 memory.ReadBytes(Registers.FLAGS, Registers.FLAGS + 1, flagsCache);
 
+                Print(flagsCache, bytesCache, bytesCount);
             }
             else if(bytecode == Bytecodes.Print_Offset) 
-                {
-                }
+            {
+                byte addressSize = NextProgramByte();
+                byte[] lowAddressBytes = NextProgramBytes(addressSize, 0);
+                byte[] highAddressBytes = NextProgramBytes(addressSize, 1);
+
+                byte bytesCountSize = NextProgramByte();
+                byte[] bytesCountBytes = NextProgramBytes(bytesCountSize, 2);
+
+                // Validation.
+                if (!IsValidWordSize(addressSize)) return;
+                if (!IsValidWordSize(bytesCountSize)) return;
+
+                byte[] bytesCache = caches.GetCache(CacheManager.M_CACHE);
+                byte[] flagsCache = caches.GetCacheOfSize(1, 3);
+
+                int lowAddress = ByteHelper.ToInt(lowAddressBytes);
+                int highAddress = ByteHelper.ToInt(highAddressBytes);
+                int bytesCount = ByteHelper.ToInt(bytesCountBytes);
+
+                memory.ReadBytes(lowAddress, highAddress, bytesCache);
+                memory.ReadBytes(Registers.FLAGS, Registers.FLAGS + 1, flagsCache);
+
+                Print(flagsCache, bytesCache, bytesCount);
+            }
 
             #endregion
 
@@ -551,6 +745,10 @@ namespace SVM
             {
                 byte aSize = NextProgramByte();
                 byte bSize = NextProgramByte();
+
+                // Validation.
+                if (!IsValidWordSize(aSize)) return;
+                if (!IsValidWordSize(bSize)) return;
 
                 byte[] aCache = caches.GetCacheOfSize(aSize, 0);
                 byte[] bCache = caches.GetCacheOfSize(bSize, 1);
@@ -598,6 +796,16 @@ namespace SVM
                 byte bRegisterCapacity = Registers.RegisterCapacity(bRegister);
                 byte rRegisterCapacity = Registers.RegisterCapacity(rRegister);
 
+                // Validation.
+                int resultSize = aRegisterCapacity > bRegisterCapacity ? aRegisterCapacity: bRegisterCapacity;
+
+                if (rRegisterCapacity < resultSize)
+                {
+                    Exit(ReturnCodes.REGISTER_OVERFLOW);
+
+                    return;
+                }
+
                 // Just get the main cache for the result, this should 
                 // not be in use at this point.
                 byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
@@ -635,6 +843,8 @@ namespace SVM
             {
                 byte size = NextProgramByte();
 
+                if (!IsValidWordSize(size)) return;
+
                 byte[] cache = caches.GetCacheOfSize(size, 0);
                 byte[] rCache = caches.GetCacheOfSize(size, 1);
                 byte[] tCache = caches.GetCacheOfSize(size, 2);
@@ -670,6 +880,8 @@ namespace SVM
             {
                 byte size = NextProgramByte();
 
+                if (!IsValidWordSize(size)) return;
+
                 byte[] cache = caches.GetCacheOfSize(size, 0);
                 byte[] rCache = caches.GetCacheOfSize(size, 1);
                 byte[] tCache = caches.GetCacheOfSize(size, 2);
@@ -689,14 +901,8 @@ namespace SVM
             // Invalid bytecode.
             else
             {
-                memory.WriteByte(sp, ReturnCodes.PC_CORRUPTED_OR_NOT_OPCODE);
-
-                sp++;
-
-                return false;
+                Exit(ReturnCodes.PC_CORRUPTED_OR_NOT_OPCODE);
             }
-
-            return true;
         }
 
         /// <summary>
@@ -770,15 +976,16 @@ namespace SVM
 
                 this.program = program;
 
-                bool running = true;
+                running = true;
 
                 while (running)
                 {
-                    running = InterpretBytecode(program[pc]);
+                    InterpretBytecode(program[pc]);
 
                     MoveProgramCounter(1);
 
                     if (pc >= program.Length) return ReturnCodes.DEFAULT_RET_CODE;
+                    if (!running)             return memory.ReadByte(sp - 1);
                 }
 
                 return memory.ReadByte(sp - 1);

@@ -21,7 +21,7 @@ namespace SVM
         #region
 
         /// <summary>
-        /// push [bytes count] [bytes]
+        /// push [bytes count word] [bytes]
         /// </summary>
         public const byte Push_Direct = 0x0080;
 
@@ -38,7 +38,7 @@ namespace SVM
         public const byte Pop = 0x0082;
 
         /// <summary>
-        /// top [bytes count] [register address] 
+        /// top [bytes count word] [register address] 
         ///
         /// Copies the given amount of bytes from the top of the stack to the given register.
         /// </summary>
@@ -118,7 +118,7 @@ namespace SVM
         /// 
         /// Jumps to given address located on the stack.
         /// </summary>
-        public const byte Jump_Stack = 0x0085;
+        public const byte Jump_Stack = 0x0086;
 
         /// <summary>
         /// nop
