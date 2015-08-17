@@ -30,7 +30,7 @@ namespace SVM
         /// 
         /// Size of the value depends on the size of the register.
         /// </summary>
-        public const byte Push_IndirectRegister = 0x0081;
+        public const byte Push_Register = 0x0081;
 
         /// <summary>
         /// pop [bytes count]
@@ -51,6 +51,12 @@ namespace SVM
         /// </summary>
         public const byte Sp = 0x0084;
 
+        /// <summary>
+        /// pushb [element word size] [elements count size] [elements count] [elements] ... 
+        /// 
+        /// Push given bytes to the stack.
+        /// </summary>
+        public const byte Push_Bytes = 0x0085;
         #endregion
 
         /*
@@ -66,25 +72,66 @@ namespace SVM
         public const byte Abort = 0x0005;
 
         /// <summary>
-        /// halt
+        /// jez [stack word] [address word] [address]
         /// 
-        /// Causes the program to halt. Useful for debugging purposes.
+        /// Jumps to given address if top value on the stack is zero.
         /// </summary>
-        public const byte Halt = 0x0015;
-        
+        public const byte Jez = 0x0025;
+
+        /// <summary>
+        /// jlz [stack word] [address word]  [address]
+        /// 
+        /// Jumps to given address if top value on the stack is less than zero.
+        /// </summary>
+        public const byte Jlz = 0x0035;
+
+        /// <summary>
+        /// jgz [stack word] [address word] [address]
+        /// 
+        /// Jumps to given address if top value on the stack is greater than zero.
+        /// </summary>
+        public const byte Jgz = 0x0045;
+
+        /// <summary>
+        /// eq [a word] [b word] [address word] [address]
+        /// 
+        /// Jumps to given address if two top value on the stack are equal.
+        /// </summary>
+        public const byte Eq = 0x0055;
+
+        /// <summary>
+        /// neq [a word] [b word] [address word] [address]
+        /// 
+        /// Jumps to given address if two top value on the stack are not equal.
+        /// </summary>
+        public const byte Neq = 0x0065;
+
+        /// <summary>
+        /// jmp [address word] [address]
+        /// 
+        /// Jumps to given address.
+        /// </summary>
+        public const byte Jump = 0x0075;
+
+        /// <summary>
+        /// jmp [stack word]
+        /// 
+        /// Jumps to given address located on the stack.
+        /// </summary>
+        public const byte Jump_Stack = 0x0085;
+
+        /// <summary>
+        /// nop
+        /// 
+        /// No operation.
+        /// </summary>
+        public const byte Nop = 0x0095;
         #endregion
 
         /*
          * Memory operations
          */
         #region
-
-        /// <summary>
-        /// Allocates more memory on the stack.
-        /// 
-        /// stackalloc [size (word)] [bytes]
-        /// </summary>
-        public const byte StackAlloc = 0x0020;
 
         // TODO: is this shit needed?
         /// <summary>
@@ -93,22 +140,6 @@ namespace SVM
         /// zeromemory [size (word)] [bytes]
         /// </summary>
         public const byte ZeroMemory = 0x0021;
-
-        /// <summary>
-        /// Allocates new array of given size. Stores begin and end address to given registers.
-        /// 
-        /// array [register (begin)] [register (end)] [register (elements count)] [elements size (word)]
-        /// </summary>
-        public const byte GenerateArray_IndirectRegister = 0x0022;
-
-        /// <summary>
-        /// Allocates new array of given size. Stores begin and end address to the stack.
-        /// 
-        /// array [register (elements count)] [elements size (word)]
-        /// 
-        /// Values store are 32-bit addresses.
-        /// </summary>
-        public const byte GenerateArray_IndirectStack = 0x0023;
 
         /// <summary>
         /// Sets given value at given location on the stack
@@ -122,7 +153,7 @@ namespace SVM
         /// 
         /// ptrstack [address_register] [size] [value]
         /// </summary>
-        public const byte PtrStack_IndirectRegister = 0x0025;
+        public const byte PtrStack_Register = 0x0025;
         
         #endregion
 
@@ -137,27 +168,34 @@ namespace SVM
         /// load [register] [bytes count] [value]
         /// </summary>
         public const byte Load = 0x0010;
+
+        /// <summary>
+        /// Loads given value to the given register.
+        /// 
+        /// load [register] [value]
+        /// </summary>
+        public const byte Load_Direct = 0x0011;
         
         /// <summary>
         /// Copies value from given address from the stack to given register
         /// 
         /// copystack [register] [value_size (word)] [address_size (word)] [address]
         /// </summary>
-        public const byte CopyStack_Direct = 0x0011;
+        public const byte CopyStack = 0x0012;
 
         /// <summary>
-        /// Copies value from given address contained inside given register from the stack to given register
+        /// Copies value from given address, contained inside given register, from the stack, to given register
         /// 
         /// copystack [size] [address_register] [target_register]
         /// </summary>
-        public const byte CopyStack_IndirectRegister = 0x0012;
+        public const byte CopyStack_Register = 0x0013;
 
         /// <summary>
         /// Clears given register.
         /// 
         /// clear [register]
         /// </summary>
-        public const byte Clear = 0x00013;
+        public const byte Clear = 0x00014;
 
         #endregion
 
@@ -171,35 +209,21 @@ namespace SVM
         /// 
         /// Math [size (word)] [size (word)]
         /// </summary>
-        public const byte Math_DirectStack = 0x0000;
+        public const byte Arithmetic_Stack = 0x0000;
 
         /// <summary>
         /// Executes math operation with two register values and stores result on the stack.
         /// 
         /// Math [register_a] [register_b]
         /// </summary>
-        public const byte Math_IndirectRegister_Stack = 0x0001;
+        public const byte Arithmetic_Register = 0x0001;
         
         /// <summary>
         /// Executes math operation with two register values and stores result to given register.
         /// 
         /// Math [register_a] [register_b] [result register]
         /// </summary>
-        public const byte Math_IndirectRegister_Register = 0x0002;
-
-        /// <summary>
-        /// Executes math operation on top of the stack and a register value. Stores result to the stack.
-        /// 
-        /// Math [size (word)] [register]
-        /// </summary>
-        public const byte Math_DirectStackRegister_Stack = 0x0003;
-
-        /// <summary>
-        /// Executes math operation with top of the stack and a register value. Stores result to the given register.
-        /// 
-        /// Math [size (word)] [register_a] [result register]
-        /// </summary>
-        public const byte Math_DirectStackRegister_Register = 0x0004;
+        public const byte Arithmetic_Register_Register = 0x0002;
 
         /// <summary>
         /// Increase given registers value by one.
@@ -249,14 +273,29 @@ namespace SVM
         /// flag [register_address]
         /// </summary>
         /// 
-        public const byte Set_Flag_IndirectRegister = 0x007E;
+        public const byte Set_Flag_Register = 0x007E;
+       
         /// <summary>
         /// Sets the flag register to given value contained at the top
         /// of the stack. Only one byte is used to set the flags.
         /// 
         /// flag
         /// </summary>
-        public const byte Set_Flag_IndirectStack = 0x007D;
+        public const byte Set_Flag_Stack = 0x007D;
+
+        /// <summary>
+        /// Moves given amount of bytes to the standard output stream.
+        /// 
+        /// print [bytes count word size] [bytes count]
+        /// </summary>
+        public const byte Print = 0x007E;
+
+        /// <summary>
+        /// Moves given amount of bytes to the standard output stream.
+        /// 
+        /// print [address size] [low address] [high address] [bytes count word size] [bytes count]
+        /// </summary>
+        public const byte Print_Offset = 0x007D;
 
         #endregion
     }

@@ -15,7 +15,7 @@ namespace SVM
     class Program
     {
         static VirtualMachine svm = new VirtualMachine(); 
-        static ByteCodeProgram program = new ByteCodeProgram();
+        static BytecodeProgram program = new BytecodeProgram();
         static Stopwatch sw = new Stopwatch();
 
         private static void StartLoggerThread()
@@ -34,7 +34,7 @@ namespace SVM
             for (int i = 0; i < 1000000; i++)
             {
                 program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
-                program.AddBytes(Bytecodes.Math_DirectStack, Sizes.WORD, Sizes.WORD);
+                program.AddBytes(Bytecodes.Arithmetic_Stack, Sizes.WORD, Sizes.WORD);
             }
 
             program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);

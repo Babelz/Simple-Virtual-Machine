@@ -94,6 +94,7 @@ namespace SVM
         #endregion
 
         #region Word ones
+
         private static readonly byte[] HWORDONE = new byte[1] { 1 };
         private static readonly byte[] WORDONE  = new byte[2] { 1, 0 };
         private static readonly byte[] LWORDONE = new byte[4] { 1, 0, 0, 0 };
@@ -101,10 +102,36 @@ namespace SVM
 
         private static readonly byte[][] WORDONES = new byte[][]
         {
+            null,
             HWORDONE,
             WORDONE,
+            null,
             LWORDONE,
+            null,
+            null,
+            null,
             DWORDONE
+        };
+
+        #endregion
+
+        #region Word zeroes
+        private static readonly byte[] HWORDZERO = new byte[1] { 0 };
+        private static readonly byte[] WORDZERO  = new byte[2] { 0, 0 };
+        private static readonly byte[] LWORDZERO = new byte[4] { 0, 0, 0, 0 };
+        private static readonly byte[] DWORDZERO = new byte[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        private static readonly byte[][] WORDZEROES = new byte[][]
+        {
+            null,
+            HWORDZERO,
+            WORDZERO,
+            null,
+            LWORDZERO,
+            null,
+            null,
+            null,
+            DWORDZERO
         };
 
         #endregion
@@ -174,18 +201,14 @@ namespace SVM
         /// <param name="results">bytes to convert</param>
         /// <returns>converted value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static int ToInt(params byte[] results)
+        public static int ToInt(params byte[] results)
         {
-            aIntCache[0] = 0;
+            // TODO: optimize.
+            if      (results.Length == 1) return results[0];
+            else if (results.Length == 2) return BitConverter.ToInt16(results, 0);
+            else if (results.Length == 4) return BitConverter.ToInt32(results, 0);
 
-            fixed (int* resultPtr = aIntCache)
-            {
-                byte* resultValPtr = (byte*)resultPtr;
-
-                for (int i = 0; i < results.Length; i++) resultValPtr[i] = results[i];
-            }
-
-            return aIntCache[0];
+            return 0;
         }
 
         /// <summary>
@@ -198,10 +221,7 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static void ToBytes(int value, byte[] results)
         {
-            fixed (byte* resultPtr = results)
-            {
-                *(int*)resultPtr = value;
-            }
+            fixed (byte* resultPtr = results) *(int*)resultPtr = value;
         }
 
         /// <summary>

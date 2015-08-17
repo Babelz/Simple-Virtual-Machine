@@ -1,35 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SVM
 {
-    public sealed class ByteCodeProgram
+    public sealed class BytecodeProgram
     {
         #region Fields
         private readonly List<byte> bytes;
         #endregion
 
-        public ByteCodeProgram()
+        public BytecodeProgram()
         {
             bytes = new List<byte>();
         }
 
-        public ByteCodeProgram InsertBytes(int startIndex, params byte[] bytes)
+        public BytecodeProgram InsertBytes(int startIndex, params byte[] bytes)
         {
             this.bytes.InsertRange(startIndex, bytes);
             
             return this;
         }
-        public ByteCodeProgram AddBytes(params byte[] bytes)
+        public BytecodeProgram AddBytes(params byte[] bytes)
         {
             this.bytes.AddRange(bytes);
 
             return this;
         }
-        public ByteCodeProgram AddValue(int value, int bytes)
+        public BytecodeProgram AddValue(int value, int bytes)
         {
             byte[] buffer = new byte[bytes];
 
@@ -45,7 +46,7 @@ namespace SVM
             return bytes.ToArray();
         }
 
-        public static implicit operator byte[](ByteCodeProgram program)
+        public static implicit operator byte[](BytecodeProgram program)
         {
             return program.bytes.ToArray();
         }

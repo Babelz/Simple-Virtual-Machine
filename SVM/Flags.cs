@@ -32,5 +32,20 @@ namespace SVM
         /// Math mod flag.
         /// </summary>
         public const byte MOD = 4;
+
+        /// <summary>
+        /// Sets standard out buffers out type to string.
+        /// </summary>
+        public const byte STR = 5;
+
+        /// <summary>
+        /// Sets standard out buffers out type to char.
+        /// </summary>
+        public const byte CH = 6;
+
+        /// <summary>
+        /// Sets standard out buffers out type to number.
+        /// </summary>
+        public const byte NUM = 7;
     }
 }

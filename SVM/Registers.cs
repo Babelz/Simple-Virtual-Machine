@@ -66,7 +66,7 @@ namespace SVM
         /// <param name="lowAddress">start address of the register</param>
         /// <returns>size of the register in bytes</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte RegisterSize(byte lowAddress)
+        public static byte RegisterCapacity(byte lowAddress)
         {
             if (lowAddress >= A && lowAddress <= C)             return 1;
             else if (lowAddress >= AA && lowAddress <= DA)      return 2;

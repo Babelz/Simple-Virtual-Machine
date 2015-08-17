@@ -50,6 +50,25 @@ namespace SVM
         }
 
         /// <summary>
+        /// Reserves given amount of bytes. If not enough space
+        /// is not available, more will be allocated.
+        /// </summary>
+        /// <param name="bytes">bytes to add</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Reserve(int bytes, int offset)
+        {
+            if (bytes + offset >= HighAddress)
+            {
+                // TODO: could do the following things..
+                //       1) optimize allocation size based on 
+                //          the memory pressure
+                //       2) use various chunk sizes to 
+                //          allocate memory 
+                Array.Resize(ref this.chunk, this.chunk.Length * 2);
+            }
+        }
+
+        /// <summary>
         /// Resizes the memory to given size.
         /// </summary>
         /// <param name="bytes">bytes to allocate</param>
@@ -66,7 +85,7 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteByte(int offset, byte value)
         {
-            Debug.Assert(offset < HighAddress);
+            Reserve(1, offset);
 
             chunk[offset] = value;
         }
@@ -78,6 +97,8 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBytes(int lowAddress, int highAddress, byte[] buffer)
         {
+            Reserve(buffer.Length, lowAddress);
+
             int i = lowAddress;
             int j = 0;
 
@@ -121,24 +142,6 @@ namespace SVM
             } while (i < highAddress);
         }
 
-        /// <summary>
-        /// Reserves given amount of bytes. If not enough space
-        /// is not available, more will be allocated.
-        /// </summary>
-        /// <param name="bytes">bytes to add</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reserve(int bytes, int offset)
-        {
-            if (bytes + offset >= HighAddress)
-            {
-                // TODO: could do the following things..
-                //       1) optimize allocation size based on 
-                //          the memory pressure
-                //       2) use various chunk sizes to 
-                //          allocate memory 
-                Array.Resize(ref this.chunk, this.chunk.Length * 2);
-            }
-        }
         /// <summary>
         /// Clears given amount of bytes.
         /// </summary>

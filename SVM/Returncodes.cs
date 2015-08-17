@@ -28,6 +28,8 @@ namespace SVM
         /// pc is in invalid state or invalid opcode was found.
         /// </summary>
         public const byte PC_CORRUPTED_OR_NOT_OPCODE = 3;
+
+        public const byte MEMORY_SECURITY = 4;
         #endregion
     }
 }

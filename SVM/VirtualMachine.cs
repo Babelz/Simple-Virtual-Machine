@@ -47,7 +47,7 @@ namespace SVM
         /// <summary>
         /// Collection of supported math functions. Used with math opcodes.
         /// </summary>
-        private readonly Action<byte[], byte[], byte[]>[] mathFunctions;
+        private readonly Action<byte[], byte[], byte[]>[] arithmeticFunctions;
 
         /// <summary>
         /// Stack pointer.
@@ -100,7 +100,7 @@ namespace SVM
             // at this time.
             caches = new CacheManager(Sizes.CHUNK_8KB);
 
-            mathFunctions = new Action<byte[], byte[], byte[]>[]
+            arithmeticFunctions = new Action<byte[], byte[], byte[]>[]
             {
                 ByteHelper.AddBytes,
                 ByteHelper.SubtractBytes,
@@ -167,6 +167,53 @@ namespace SVM
         }
         #endregion
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ZeroOperation(Func<int, bool> condition)
+        {
+            byte stackSize = NextProgramByte();
+            byte addressSize = NextProgramByte();
+            byte[] addressBytes = NextProgramBytes(addressSize, 0);
+
+            byte[] stackCache = caches.GetCacheOfSize(stackSize, 1);
+
+            memory.ReadBytes(sp - stackSize, sp, stackCache);
+
+            int value = ByteHelper.ToInt(stackCache);
+
+            if (condition(value))
+            {
+                // Set pc to given address.
+                int address = ByteHelper.ToInt(addressBytes);
+
+                pc = address - 1;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EqOperation(Func<int, int, bool> condition)
+        {
+            byte aSize = NextProgramByte();
+            byte bSize = NextProgramByte();
+            byte addressSize = NextProgramByte();
+            byte[] addressBytes = NextProgramBytes(addressSize, 0);
+
+            byte[] aCache = caches.GetCacheOfSize(aSize, 1);
+            byte[] bCache = caches.GetCacheOfSize(bSize, 2);
+
+            memory.ReadBytes(sp - bSize - aSize, sp - bSize, aCache);
+            memory.ReadBytes(sp - bSize, sp, bCache);
+
+            int a = ByteHelper.ToInt(aCache);
+            int b = ByteHelper.ToInt(bCache);
+
+            if (condition(a, b))
+            {
+                int address = ByteHelper.ToInt(addressBytes);
+
+                pc = address - 1;
+            }
+        }
+
         private bool InterpretBytecode(byte bytecode)
         {
             // TODO: bytecode masking to speed up the lookup.
@@ -183,22 +230,17 @@ namespace SVM
                 // Read the variable values.
                 byte[] bytes = NextProgramBytes(size, 0);
 
-                // Reserve room for the bytes and write them to the stack.
-                memory.Reserve(size, sp);
                 memory.WriteBytes(sp, sp + size, bytes);
 
                 MoveStackPointer(size);
             }
-            else if (bytecode == Bytecodes.Push_IndirectRegister)
+            else if (bytecode == Bytecodes.Push_Register)
             {
                 // Read register address and get its size.
                 byte register = NextProgramByte();
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 Debug.Assert(registerCapacity <= Sizes.DWORD);
-
-                // Reserve memory for next push operation.
-                memory.Reserve(registerCapacity, sp);
 
                 // Get reusable buffer to store the bytes.
                 byte[] cache = caches.GetCacheOfSize(registerCapacity, 0);
@@ -225,7 +267,7 @@ namespace SVM
             {
                 byte size = NextProgramByte();
                 byte register = NextProgramByte();
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 // Get cache.
                 byte[] cache = caches.GetCacheOfSize(size, 0);
@@ -241,7 +283,7 @@ namespace SVM
             else if (bytecode == Bytecodes.Sp)
             {
                 byte register = NextProgramByte();
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 // Check that the stack pointer fits to this register.
                 Debug.Assert(registerCapacity >= 4);
@@ -251,6 +293,21 @@ namespace SVM
                 ByteHelper.ToBytes(sp, cache);
 
                 memory.WriteBytes(register, register + 4, cache);
+            }
+            else if (bytecode == Bytecodes.Push_Bytes)
+            {
+                byte elementSize = NextProgramByte();
+                byte elementsSizeCount = NextProgramByte();
+                byte[] elementsCountBytes = NextProgramBytes(elementsSizeCount, 0);
+
+                // Get elements count.
+                int elementsCount = ByteHelper.ToInt(elementsCountBytes);
+
+                // Read es * ews amount of bytes from program memory.
+                byte[] bytes = NextProgramBytes(elementSize * elementsCount, 1);
+
+                // Write to stack.
+                memory.WriteBytes(sp, sp + bytes.Length, bytes);
             }
 
             #endregion
@@ -263,20 +320,31 @@ namespace SVM
                 byte size = NextProgramByte();
                 byte[] bytes = NextProgramBytes(size, 0);
 
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 Debug.Assert(registerCapacity >= size);
 
                 memory.WriteBytes(register, register + size, bytes);
             }
-            else if (bytecode == Bytecodes.CopyStack_Direct)
+            else if (bytecode == Bytecodes.Load_Direct)
+            {
+                byte register = NextProgramByte();
+                byte registerCapacity = Registers.RegisterCapacity(register);
+
+                byte[] bytes = NextProgramBytes(registerCapacity, 0);
+
+                Debug.Assert(registerCapacity >= bytes.Length);
+
+                memory.WriteBytes(register, register + bytes.Length, bytes);
+            }
+            else if (bytecode == Bytecodes.CopyStack)
             {
                 byte register = NextProgramByte();
                 byte valueSize = NextProgramByte();
                 byte addressSize = NextProgramByte();
                 byte[] addressBytes = NextProgramBytes(valueSize, 0);
 
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 Debug.Assert(registerCapacity >= valueSize);
 
@@ -292,14 +360,14 @@ namespace SVM
                 // Copy value from the stack to given register.
                 memory.WriteBytes(register, register + registerCapacity, cache);
             }
-            else if (bytecode == Bytecodes.CopyStack_IndirectRegister)
+            else if (bytecode == Bytecodes.CopyStack_Register)
             {
                 byte size = NextProgramByte();
                 byte addressRegister = NextProgramByte();
                 byte targetRegister = NextProgramByte();
 
-                byte targetRegisterCapacity = Registers.RegisterSize(targetRegister);
-                byte addressRegisterCapacity = Registers.RegisterSize(addressRegister);
+                byte targetRegisterCapacity = Registers.RegisterCapacity(targetRegister);
+                byte addressRegisterCapacity = Registers.RegisterCapacity(addressRegister);
 
                 byte[] addressBytes = caches.GetCacheOfSize(size, 0);
                 byte[] valueBytes = caches.GetCacheOfSize(size, 1);
@@ -319,7 +387,7 @@ namespace SVM
             else if (bytecode == Bytecodes.Clear)
             {
                 byte register = NextProgramByte();
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 memory.Clear(register, register + registerCapacity);
             }
@@ -330,33 +398,63 @@ namespace SVM
 
             else if (bytecode == Bytecodes.Abort)
             {
-                Console.WriteLine("Abort has been called");
-
-                memory.Reserve(1, sp);
                 memory.WriteByte(sp, ReturnCodes.ABORT_CALLED);
 
                 MoveStackPointer(1);
 
                 return false;
             }
-            else if (bytecode == Bytecodes.Halt)
+            else if (bytecode == Bytecodes.Jez)
             {
-                Console.WriteLine("Halt was called");
+                ZeroOperation(i => i == 0);
             }
+            else if (bytecode == Bytecodes.Jlz)
+            {
+                ZeroOperation(i => i < 0);
+            }
+            else if (bytecode == Bytecodes.Jgz)
+            {
+                ZeroOperation(i => i > 0);
+            }
+            else if (bytecode == Bytecodes.Eq)
+            {
+                EqOperation((a, b) => a == b);
+            }
+            else if (bytecode == Bytecodes.Neq)
+            {
+                EqOperation((a, b) => a != b);
+            }
+            else if (bytecode == Bytecodes.Jump)
+            {
+                byte addressSize = NextProgramByte();
+                byte[] addressBytes = NextProgramBytes(addressSize, 0);
 
+                int address = ByteHelper.ToInt(addressBytes);
+
+                // One will be reduced from all jump addresses
+                // since we increase our pc by one after opcode
+                // has been executed.
+                pc = address - 1;
+            }
+            else if (bytecode == Bytecodes.Jump_Stack)
+            {
+                byte size = NextProgramByte();
+                byte[] cache = caches.GetCacheOfSize(size, 0);
+
+                memory.ReadBytes(sp - size, sp, cache);
+
+                int address = ByteHelper.ToInt(cache);
+
+                pc = address - 1;
+            }
+            else if (bytecode == Bytecodes.Nop)
+            {
+                // No operation.
+            }
             #endregion
 
             #region Memory operations
 
-            else if (bytecode == Bytecodes.StackAlloc)
-            {
-                byte size = NextProgramByte();
-                byte[] bytes = NextProgramBytes(size, 0);
-
-                int bytesToAlloc = ByteHelper.ToInt(bytes);
-
-                memory.Reserve(bytesToAlloc, sp);
-            }
             else if (bytecode == Bytecodes.ZeroMemory)
             {
                 byte size = NextProgramByte();
@@ -365,64 +463,6 @@ namespace SVM
                 int bytesToClear = ByteHelper.ToInt(bytes);
 
                 memory.Clear(sp - bytesToClear, sp);
-            }
-            else if (bytecode == Bytecodes.GenerateArray_IndirectRegister)
-            {
-                byte lowAddressRegister = NextProgramByte();
-                byte highAddressRegister = NextProgramByte();
-
-                byte bytesRegister = NextProgramByte();
-                byte elementSize = NextProgramByte();
-
-                byte bytesRegisterCapacity = Registers.RegisterSize(bytesRegister);
-
-                // Copy elements count to cache.
-                byte[] cache = caches.GetCacheOfSize(bytesRegisterCapacity, 0);
-                memory.ReadBytes(bytesRegister, bytesRegister + bytesRegisterCapacity, cache);
-
-                int count = ByteHelper.ToInt(cache);
-                int totalBytes = count * elementSize;
-
-                memory.Reserve(totalBytes, sp);
-
-                // Store high and low addresses.
-                ByteHelper.ToBytes(sp, cache);
-                memory.WriteBytes(lowAddressRegister, Registers.RegisterSize(lowAddressRegister), cache);
-
-                ByteHelper.ToBytes(sp + totalBytes, cache);
-                memory.WriteBytes(highAddressRegister, highAddressRegister + Registers.RegisterSize(highAddressRegister), cache);
-
-                MoveStackPointer(totalBytes);
-            }
-            else if (bytecode == Bytecodes.GenerateArray_IndirectStack)
-            {
-                byte elementsCountRegister = NextProgramByte();
-                byte elementSize = NextProgramByte();
-
-                byte elementsCountRegisterCapacity = Registers.RegisterSize(elementsCountRegister);
-
-                // Copy elements count to cache.
-                byte[] cache = caches.GetCacheOfSize(elementsCountRegisterCapacity, 0);
-                memory.ReadBytes(elementsCountRegister, elementsCountRegister + elementsCountRegisterCapacity, cache);
-
-                int count = ByteHelper.ToInt(cache);
-                int totalBytes = count * elementSize;
-
-                memory.Reserve(totalBytes, sp);
-
-                int beg = sp;
-                int end = sp + totalBytes;
-
-                MoveStackPointer(totalBytes);
-
-                // Get bytes and write them to the memory.
-                ByteHelper.ToBytes(sp, cache);
-                memory.WriteBytes(sp, sp + 4, cache);
-                MoveStackPointer(4);
-
-                ByteHelper.ToBytes(sp + totalBytes, cache);
-                memory.WriteBytes(sp, sp + 4, cache);
-                MoveStackPointer(4);
             }
             else if (bytecode == Bytecodes.PtrStack)
             {
@@ -440,13 +480,13 @@ namespace SVM
 
                 memory.WriteBytes(address, address + addressBytes.Length, valueBytes);
             }
-            else if (bytecode == Bytecodes.PtrStack_IndirectRegister)
+            else if (bytecode == Bytecodes.PtrStack_Register)
             {
                 byte register = NextProgramByte();
                 byte size = NextProgramByte();
                 byte[] bytes = NextProgramBytes(size, 0);
 
-                byte registerCapacity = Registers.RegisterSize(register);
+                byte registerCapacity = Registers.RegisterCapacity(register);
 
                 // Copy address from the memory to given cache.
                 byte[] cache = caches.GetCacheOfSize(size, 1);
@@ -484,12 +524,30 @@ namespace SVM
 
                 memory.WriteByte(Registers.FLAGS, value);
             }
+            else if (bytecode == Bytecodes.Print)
+            {
+                byte size = NextProgramByte();
+                byte[] bytesCountBytes = NextProgramBytes(size, 0);
+
+                int bytesCount = ByteHelper.ToInt(bytesCountBytes);
+
+                byte[] cache = caches.GetCache(CacheManager.M_CACHE);
+                byte[] flagsCache = caches.GetCacheOfSize(1, 1);
+
+                memory.ReadBytes(sp - bytesCount, sp, cache);
+
+                memory.ReadBytes(Registers.FLAGS, Registers.FLAGS + 1, flagsCache);
+
+            }
+            else if(bytecode == Bytecodes.Print_Offset) 
+                {
+                }
 
             #endregion
 
             #region Arithmetic operations
 
-            else if (bytecode == Bytecodes.Math_DirectStack)
+            else if (bytecode == Bytecodes.Arithmetic_Stack)
             {
                 byte aSize = NextProgramByte();
                 byte bSize = NextProgramByte();
@@ -501,22 +559,21 @@ namespace SVM
                 memory.ReadBytes(sp - aSize, sp, aCache);
                 memory.ReadBytes(sp - aSize - bSize, sp - aSize, bCache);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
+                arithmeticFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
                 MoveStackPointer(-(aSize + bSize));
 
-                memory.Reserve(aSize, sp);
                 memory.WriteBytes(sp, sp + aSize, rCache);
 
                 MoveStackPointer(aSize);
             }
-            else if (bytecode == Bytecodes.Math_IndirectRegister_Stack)
+            else if (bytecode == Bytecodes.Arithmetic_Register)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
 
-                byte aRegisterCapacity = Registers.RegisterSize(aRegister);
-                byte bRegisterCapacity = Registers.RegisterSize(bRegister);
+                byte aRegisterCapacity = Registers.RegisterCapacity(aRegister);
+                byte bRegisterCapacity = Registers.RegisterCapacity(bRegister);
 
                 byte[] aCache = caches.GetCacheOfSize(aRegisterCapacity, 0);
                 byte[] bCache = caches.GetCacheOfSize(bRegisterCapacity, 1);
@@ -525,22 +582,21 @@ namespace SVM
                 memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
                 memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
+                arithmeticFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
-                memory.Reserve(aRegisterCapacity, sp);
                 memory.WriteBytes(sp, sp + aRegisterCapacity, rCache);
 
                 MoveStackPointer(aRegisterCapacity);
             }
-            else if (bytecode == Bytecodes.Math_IndirectRegister_Register)
+            else if (bytecode == Bytecodes.Arithmetic_Register_Register)
             {
                 byte aRegister = NextProgramByte();
                 byte bRegister = NextProgramByte();
                 byte rRegister = NextProgramByte();
 
-                byte aRegisterCapacity = Registers.RegisterSize(aRegister);
-                byte bRegisterCapacity = Registers.RegisterSize(bRegister);
-                byte rRegisterCapacity = Registers.RegisterSize(rRegister);
+                byte aRegisterCapacity = Registers.RegisterCapacity(aRegister);
+                byte bRegisterCapacity = Registers.RegisterCapacity(bRegister);
+                byte rRegisterCapacity = Registers.RegisterCapacity(rRegister);
 
                 // Just get the main cache for the result, this should 
                 // not be in use at this point.
@@ -553,63 +609,14 @@ namespace SVM
                 memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
                 memory.ReadBytes(rRegister, rRegister + rRegisterCapacity, rCache);
 
-                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
+                arithmeticFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
 
                 memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
-            }
-            else if (bytecode == Bytecodes.Math_DirectStackRegister_Stack)
-            {
-                byte size = NextProgramByte();
-                byte register = NextProgramByte();
-
-                byte registerCapacity = Registers.RegisterSize(register);
-
-                // Copy data to caches.
-                byte[] aCache = caches.GetCacheOfSize(size, 0);
-                byte[] bCache = caches.GetCacheOfSize(size, 1);
-                byte[] rCache = caches.GetCacheOfSize(size, 2);
-
-                memory.ReadBytes(sp - size, sp, aCache);
-                memory.ReadBytes(register, register + registerCapacity, bCache);
-
-                // TODO: is this moving really needed? Can't say at this time.. (29.7.2015 - 5:27).
-                MoveStackPointer(-size);
-
-                mathFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
-
-                memory.Reserve(size, sp);
-                memory.WriteBytes(sp, sp + size, rCache);
-
-                // TODO: is this moving really needed? Can't say at this time.. (29.7.2015 - 5:27).
-                MoveStackPointer(size);
-            }
-            else if (bytecode == Bytecodes.Math_DirectStackRegister_Register)
-            {
-                // Get the size.
-                byte size = program[pc + 1];
-                byte register = program[pc + 3];
-
-                bytecode = Bytecodes.Math_DirectStackRegister_Stack;
-                InterpretBytecode(bytecode);
-
-                // Copy the result to given cache.
-                byte[] cache = caches.GetCacheOfSize(size, 0);
-                memory.ReadBytes(sp - size, sp, cache);
-
-                memory.WriteBytes(register, register + size, cache);
-
-                // Clear stack from earlier calls.
-                memory.Clear(sp - size, size);
-
-                MoveStackPointer(-size);
-
-                // Before this, we are pointing to this opcodes last argument.
-                MoveProgramCounter(1);
             }
             else if (bytecode == Bytecodes.Inc_Reg)
             {
                 byte register = NextProgramByte();
-                byte size = Registers.RegisterSize(register);
+                byte size = Registers.RegisterCapacity(register);
 
                 byte[] cache = caches.GetCacheOfSize(size, 0);
                 byte[] rCache = caches.GetCacheOfSize(size, 1);
@@ -623,8 +630,6 @@ namespace SVM
                 ByteHelper.AddBytes(cache, tCache, rCache);
 
                 memory.WriteBytes(register, register + size, rCache);
-
-                Console.WriteLine(ByteHelper.ToInt(rCache));
             }
             else if (bytecode == Bytecodes.Inc_Stack)
             {
@@ -646,7 +651,7 @@ namespace SVM
             else if (bytecode == Bytecodes.Dec_Reg)
             {
                 byte register = NextProgramByte();
-                byte size = Registers.RegisterSize(register);
+                byte size = Registers.RegisterCapacity(register);
 
                 byte[] cache = caches.GetCacheOfSize(size, 0);
                 byte[] rCache = caches.GetCacheOfSize(size, 1);
@@ -684,7 +689,6 @@ namespace SVM
             // Invalid bytecode.
             else
             {
-                memory.Reserve(1, sp);
                 memory.WriteByte(sp, ReturnCodes.PC_CORRUPTED_OR_NOT_OPCODE);
 
                 sp++;
@@ -747,7 +751,7 @@ namespace SVM
         }
         public int ReadRegisterValue(byte register)
         {
-            byte registerCapacity = Registers.RegisterSize(register);
+            byte registerCapacity = Registers.RegisterCapacity(register);
 
             byte[] buffer = new byte[registerCapacity];
 
