@@ -312,7 +312,7 @@ namespace SVMT
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD).AddValue(10, Sizes.HWORD);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD).AddValue(10, Sizes.HWORD);
-            program.AddBytes(Bytecodes.Eq, Sizes.HWORD, Sizes.HWORD, Sizes.HWORD).AddValue(10, Sizes.HWORD);
+            program.AddBytes(Bytecodes.Jeq, Sizes.HWORD, Sizes.HWORD, Sizes.HWORD).AddValue(10, Sizes.HWORD);
             program.AddBytes(Bytecodes.Abort);
 
             svm.Initialize();
@@ -335,7 +335,7 @@ namespace SVMT
         public void JumpTests()
         {
             BytecodeProgram program = new BytecodeProgram();
-            program.AddBytes(Bytecodes.Jump, Sizes.WORD).AddValue(12, Sizes.WORD);
+            program.AddBytes(Bytecodes.Jmp, Sizes.WORD).AddValue(12, Sizes.WORD);
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Nop);
@@ -358,7 +358,7 @@ namespace SVMT
         {
             BytecodeProgram program = new BytecodeProgram();
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(14, Sizes.WORD);
-            program.AddBytes(Bytecodes.Jump_Stack, Sizes.WORD);
+            program.AddBytes(Bytecodes.Jmp_Stack, Sizes.WORD);
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Nop);

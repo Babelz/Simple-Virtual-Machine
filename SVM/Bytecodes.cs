@@ -21,7 +21,7 @@ namespace SVM
         #region
 
         /// <summary>
-        /// push [bytes count word] [bytes]
+        /// push [word size] [bytes]
         /// </summary>
         public const byte Push_Direct = 0x0080;
 
@@ -38,7 +38,7 @@ namespace SVM
         public const byte Pop = 0x0082;
 
         /// <summary>
-        /// top [bytes count word] [register address] 
+        /// top [bytes count] [register address] 
         ///
         /// Copies the given amount of bytes from the top of the stack to the given register.
         /// </summary>
@@ -52,7 +52,7 @@ namespace SVM
         public const byte Sp = 0x0084;
 
         /// <summary>
-        /// pushb [element word size] [elements count size] [elements count] [elements] ... 
+        /// pushb [element size] [elements count size] [elements count] [elements] ... 
         /// 
         /// Push given bytes to the stack.
         /// </summary>
@@ -97,28 +97,28 @@ namespace SVM
         /// 
         /// Jumps to given address if two top value on the stack are equal.
         /// </summary>
-        public const byte Eq = 0x0055;
+        public const byte Jeq = 0x0055;
 
         /// <summary>
         /// neq [a word] [b word] [address word] [address]
         /// 
         /// Jumps to given address if two top value on the stack are not equal.
         /// </summary>
-        public const byte Neq = 0x0065;
+        public const byte Jneq = 0x0065;
 
         /// <summary>
         /// jmp [address word] [address]
         /// 
         /// Jumps to given address.
         /// </summary>
-        public const byte Jump = 0x0075;
+        public const byte Jmp = 0x0075;
 
         /// <summary>
         /// jmp [stack word]
         /// 
         /// Jumps to given address located on the stack.
         /// </summary>
-        public const byte Jump_Stack = 0x0086;
+        public const byte Jmp_Stack = 0x0086;
 
         /// <summary>
         /// nop
@@ -262,7 +262,7 @@ namespace SVM
         /// <summary>
         /// Sets the flag register to given value. Value must be a word.
         /// 
-        /// flag [value (size of word)]
+        /// flag [value (size of hword)]
         /// </summary>
         public const byte Set_Flag_Direct = 0x007F;
 
@@ -284,7 +284,7 @@ namespace SVM
         public const byte Set_Flag_Stack = 0x007D;
 
         /// <summary>
-        /// Moves given amount of bytes to the standard output stream.
+        /// Moves given amount of bytes to the standard output stream from the stack.
         /// 
         /// print [bytes count word size] [bytes count]
         /// </summary>

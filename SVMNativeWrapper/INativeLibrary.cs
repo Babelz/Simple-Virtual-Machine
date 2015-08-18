@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SVMAssembler
+namespace SVMNativeWrapper
 {
-    class Program
+    public interface INativeLibrary
     {
-        static void Main(string[] args)
-        {
-        }
     }
 }

@@ -59,12 +59,6 @@ namespace SVM
         /// </summary>
         private int pc;
 
-        /// <summary>
-        /// Program counter registers used to return from 
-        /// function calls.
-        /// </summary>
-        private int retpc;
-
         private bool running;
         #endregion
 
@@ -88,6 +82,14 @@ namespace SVM
             get
             {
                 return sp;
+            }
+        }
+
+        public int ProgramCounter
+        {
+            get
+            {
+                return pc;
             }
         }
         #endregion
@@ -541,15 +543,15 @@ namespace SVM
             {
                 ZeroOperation(i => i > 0);
             }
-            else if (bytecode == Bytecodes.Eq)
+            else if (bytecode == Bytecodes.Jeq)
             {
                 EqOperation((a, b) => a == b);
             }
-            else if (bytecode == Bytecodes.Neq)
+            else if (bytecode == Bytecodes.Jneq)
             {
                 EqOperation((a, b) => a != b);
             }
-            else if (bytecode == Bytecodes.Jump)
+            else if (bytecode == Bytecodes.Jmp)
             {
                 byte addressSize = NextProgramByte();
                 byte[] addressBytes = NextProgramBytes(addressSize, 0);
@@ -571,7 +573,7 @@ namespace SVM
                 // has been executed.
                 pc = address - 1;
             }
-            else if (bytecode == Bytecodes.Jump_Stack)
+            else if (bytecode == Bytecodes.Jmp_Stack)
             {
                 byte size = NextProgramByte();
                 byte[] cache = caches.GetCacheOfSize(size, 0);
