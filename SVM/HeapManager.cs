@@ -6,46 +6,46 @@ using System.Threading.Tasks;
 
 namespace SVM
 {
+    /// <summary>
+    /// TODO: initial implementation. This version is fucking slow. 
+    ///       please fix it.
+    ///       
+    /// TODO: fix lookup speed.
+    /// </summary>
     internal sealed class HeapManager
     {
         #region Fields
-        private int[] offsets;
-        private byte[] heap;
-
-        /// <summary>
-        /// Heap pointer.
-        /// </summary>
-        private int hp;
-
-        /// <summary>
-        /// Offset pointer.
-        /// </summary>
-        private int op;
         #endregion
 
         public HeapManager(int initialChunkSize)
         {
-            heap = new byte[initialChunkSize];
-            offsets = new int[128];
         }
 
-        private void RecordSize(byte[] bytes)
-        {
-            offsets[op] = bytes.Length;
-            op++;
-
-            if (op >= offsets.Length) Array.Resize(ref offsets, offsets.Length * 2);
-        }
-
-        public void Allocate(byte[] bytes)
-        {
-            if (hp + bytes.Length >= heap.Length) Array.Resize(ref heap, heap.Length * 2);
-
-            for (int i = 0; i < bytes.Length; i++) heap[hp + i] = bytes[i];
-        }
-        public void Release()
+        private void EnsureHeapCapacity(int bytes)
         {
         }
+        private void EnsureRecordCapacity()
+        {
+        }
+
+        public void ReAllocate(int lowAddress, int bytes)
+        {
+
+        }
+        public void Allocate(int bytes)
+        {
+        }
+        public void Delete(int lowAddress)
+        {
+        }
+        
+        public void ReadBytes(int lowAddress, int highAddress, byte[] buffer)
+        {
+        }
+        public void WriteBytes(int lowAddress, int highAddress, byte[] buffer)
+        {
+        }
+
         public void Clear()
         {
         }

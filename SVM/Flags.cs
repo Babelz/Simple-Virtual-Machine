@@ -9,38 +9,68 @@ namespace SVM
     public static class Flags
     {
         /// <summary>
-        /// Math add flag.
+        /// Math int add flag.
         /// </summary>
-        public const byte ADD = 0;
+        public const byte INT_ADD = 0;
 
         /// <summary>
-        /// Math sub flag.
+        /// Math int sub flag.
         /// </summary>
-        public const byte SUB = 1;
+        public const byte INT_SUB = 1;
 
         /// <summary>
-        /// Math div flag.
+        /// Math int  div flag.
         /// </summary>
-        public const byte DIV = 2;
+        public const byte INT_DIV = 2;
 
         /// <summary>
-        /// Math mul flag.
+        /// Math int mul flag.
         /// </summary>
-        public const byte MUL = 3;
+        public const byte INT_MUL = 3;
 
         /// <summary>
-        /// Math mod flag.
+        /// Math int mod flag.
         /// </summary>
-        public const byte MOD = 4;
+        public const byte INT_MOD = 4;
+
+        /// <summary>
+        /// Math float add flag.
+        /// </summary>
+        public const byte FLOAT_ADD = 5;
+
+        /// <summary>
+        /// Math float sub flag.
+        /// </summary>
+        public const byte FLOAT_SUB = 6;
+
+        /// <summary>
+        /// Math float  div flag.
+        /// </summary>
+        public const byte FLOAT_DIV = 7;
+
+        /// <summary>
+        /// Math float mul flag.
+        /// </summary>
+        public const byte FLOAT_MUL = 8;
+
+        /// <summary>
+        /// Math float mod flag.
+        /// </summary>
+        public const byte FLOAT_MOD = 9;
 
         /// <summary>
         /// Sets standard out buffers out type to string.
         /// </summary>
-        public const byte STR = 5;
+        public const byte STR = 10;
 
         /// <summary>
-        /// Sets standard out buffers out type to number.
+        /// Sets standard out buffers out type to int.
         /// </summary>
-        public const byte NUM = 7;
+        public const byte INT = 11;
+
+        /// <summary>
+        /// Sets standard out buffers out type to float.
+        /// </summary>
+        public const byte FLOAT = 11;
     }
 }

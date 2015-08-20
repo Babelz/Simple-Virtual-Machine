@@ -34,7 +34,7 @@ namespace SVMT
                 ByteHelper.ToBytes(i * 2, lhs);
                 ByteHelper.ToBytes(i * 4, rhs);
 
-                ByteHelper.AddBytes(lhs, rhs, bytes);
+                ByteHelper.AddIntBytes(lhs, rhs, bytes);
 
                 int result = ByteHelper.ToInt(bytes);
 
@@ -54,7 +54,7 @@ namespace SVMT
                 ByteHelper.ToBytes(i * 2, lhs);
                 ByteHelper.ToBytes(i, rhs);
 
-                ByteHelper.SubtractBytes(lhs, rhs, bytes);
+                ByteHelper.SubtractIntBytes(lhs, rhs, bytes);
 
                 int result = ByteHelper.ToInt(bytes);
 
@@ -91,7 +91,7 @@ namespace SVMT
                 ByteHelper.ToBytes(i, rhs);
                 ByteHelper.ToBytes(i * 2, real);
 
-                ByteHelper.AddBytes(lhs, rhs, result);
+                ByteHelper.AddIntBytes(lhs, rhs, result);
 
                 for (int j = 0; j < result.Length; j++)
                 {
@@ -112,7 +112,7 @@ namespace SVMT
                 ByteHelper.ToBytes(i * 2, lhs);
                 ByteHelper.ToBytes(i, rhs);
 
-                ByteHelper.SubtractBytes(lhs, rhs, bytes);
+                ByteHelper.SubtractIntBytes(lhs, rhs, bytes);
 
                 int result = ByteHelper.ToInt(bytes);
 

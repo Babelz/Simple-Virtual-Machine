@@ -25,14 +25,14 @@ namespace SVMT
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 8, 0);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 7, 0);
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_ADD);
             program.AddBytes(Bytecodes.Arithmetic_Stack, Sizes.WORD, Sizes.WORD);
-            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.AA);
+            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.R16A);
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            int result = svm.ReadRegisterValue(Registers.AA);
+            int result = svm.ReadRegisterValue(Registers.R16A);
 
             Assert.AreEqual(15, result, "Direct stack failed");
         }
@@ -49,18 +49,18 @@ namespace SVMT
 
                 // Add direct stack.
                 BytecodeProgram program = new BytecodeProgram();
-                program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
-                program.AddBytes(Bytecodes.Load, Registers.AB, Sizes.LWORD, lbs1, 0, 0, 0);
-                program.AddBytes(Bytecodes.Load, Registers.BB, Sizes.LWORD, lbs2, 0, 0, 0);
-                program.AddBytes(Bytecodes.Arithmetic_Register, Registers.AB, Registers.BB);
-                program.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.CB);
+                program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_ADD);
+                program.AddBytes(Bytecodes.Load, Registers.R32A, Sizes.LWORD, lbs1, 0, 0, 0);
+                program.AddBytes(Bytecodes.Load, Registers.R32B, Sizes.LWORD, lbs2, 0, 0, 0);
+                program.AddBytes(Bytecodes.Arithmetic_Register, Registers.R32A, Registers.R32B);
+                program.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.R32C);
 
                 svm.Initialize();
                 byte pretc = svm.RunProgram(program);
 
                 string ms = ReturnCodes.ToString(pretc);
 
-                int result = svm.ReadRegisterValue(Registers.CB);
+                int result = svm.ReadRegisterValue(Registers.R32C);
 
                 Assert.AreEqual(lbs1 + lbs2, result, "IndirectRegister_Stack failed, " + ms.ToLower());
             }
@@ -71,20 +71,20 @@ namespace SVMT
         {
             BytecodeProgram program = new BytecodeProgram();
 
-            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD, 1, 0);
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
-            program.AddBytes(Bytecodes.Arithmetic_Register_Register, Registers.AA, Registers.BA, Registers.CA);
+            program.AddBytes(Bytecodes.Load, Registers.R16A, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_ADD);
+            program.AddBytes(Bytecodes.Arithmetic_Register_Register, Registers.R16A, Registers.R16B, Registers.R16C);
 
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
-                program.AddBytes(Bytecodes.Arithmetic_Register_Register, Registers.AA, Registers.CA, Registers.CA);
+                program.AddBytes(Bytecodes.Load, Registers.R16B, Sizes.WORD, 1, 0);
+                program.AddBytes(Bytecodes.Arithmetic_Register_Register, Registers.R16A, Registers.R16C, Registers.R16C);
             }
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            int result = svm.ReadRegisterValue(Registers.CA);
+            int result = svm.ReadRegisterValue(Registers.R16C);
 
             Assert.AreEqual(1001, result);
         }
@@ -102,14 +102,14 @@ namespace SVMT
             // a - b..
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 10, 0);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 15, 0);
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_SUB);
             program.AddBytes(Bytecodes.Arithmetic_Stack, Sizes.WORD, Sizes.WORD);
-            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.AA);
+            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.R16A);
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            int result = svm.ReadRegisterValue(Registers.AA);
+            int result = svm.ReadRegisterValue(Registers.R16A);
 
             Assert.AreEqual(5, result, "Direct stack failed");
         }
@@ -126,16 +126,16 @@ namespace SVMT
 
                 // Add direct stack.
                 BytecodeProgram program1 = new BytecodeProgram();
-                program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
-                program1.AddBytes(Bytecodes.Load, Registers.BB, Sizes.LWORD, Math.Min(lbs1, lbs2), 0, 0, 0);
-                program1.AddBytes(Bytecodes.Load, Registers.AB, Sizes.LWORD, Math.Max(lbs1, lbs2), 0, 0, 0);
-                program1.AddBytes(Bytecodes.Arithmetic_Register, Registers.AB, Registers.BB);
-                program1.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.CB);
+                program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_SUB);
+                program1.AddBytes(Bytecodes.Load, Registers.R32B, Sizes.LWORD, Math.Min(lbs1, lbs2), 0, 0, 0);
+                program1.AddBytes(Bytecodes.Load, Registers.R32A, Sizes.LWORD, Math.Max(lbs1, lbs2), 0, 0, 0);
+                program1.AddBytes(Bytecodes.Arithmetic_Register, Registers.R32A, Registers.R32B);
+                program1.AddBytes(Bytecodes.Top, Sizes.LWORD, Registers.R32C);
 
                 svm.Initialize();
                 svm.RunProgram(program1);
 
-                int result = svm.ReadRegisterValue(Registers.CB);
+                int result = svm.ReadRegisterValue(Registers.R32C);
 
                 Assert.AreEqual(Math.Max(lbs1, lbs2) - Math.Min(lbs1, lbs2), result, "IndirectRegister_Stack failed");
             }
@@ -146,19 +146,19 @@ namespace SVMT
         {
             BytecodeProgram program = new BytecodeProgram();
 
-            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD).AddValue(1000, 2);
-            program.AddBytes(Bytecodes.Load, Registers.BA, Sizes.WORD, 1, 0);
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.SUB);
+            program.AddBytes(Bytecodes.Load, Registers.R16A, Sizes.WORD).AddValue(1000, 2);
+            program.AddBytes(Bytecodes.Load, Registers.R16B, Sizes.WORD, 1, 0);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_SUB);
 
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Bytecodes.Arithmetic_Register_Register, Registers.AA, Registers.BA, Registers.AA);
+                program.AddBytes(Bytecodes.Arithmetic_Register_Register, Registers.R16A, Registers.R16B, Registers.R16A);
             }
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            int result = svm.ReadRegisterValue(Registers.AA);
+            int result = svm.ReadRegisterValue(Registers.R16A);
 
             Assert.AreEqual(0, result);
         }
@@ -170,13 +170,13 @@ namespace SVMT
             
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Bytecodes.Inc_Reg, Registers.AA);
+                program.AddBytes(Bytecodes.Inc_Reg, Registers.R16A);
             }
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            Assert.AreEqual(1000, svm.ReadRegisterValue(Registers.AA));
+            Assert.AreEqual(1000, svm.ReadRegisterValue(Registers.R16A));
         }
 
         [TestMethod]
@@ -184,19 +184,19 @@ namespace SVMT
         {
             BytecodeProgram program = new BytecodeProgram();
 
-            program.AddBytes(Bytecodes.Load, Registers.AA, Sizes.WORD).AddValue(1000, Sizes.WORD);
-            program.AddBytes(Bytecodes.Load, Registers.AB, Sizes.WORD).AddValue(1000, Sizes.WORD);
+            program.AddBytes(Bytecodes.Load, Registers.R16A, Sizes.WORD).AddValue(1000, Sizes.WORD);
+            program.AddBytes(Bytecodes.Load, Registers.R32A, Sizes.WORD).AddValue(1000, Sizes.WORD);
            
             for (int i = 0; i < 1000; i++)
             {
-                program.AddBytes(Bytecodes.Dec_Reg, Registers.AA);
+                program.AddBytes(Bytecodes.Dec_Reg, Registers.R16A);
             }
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            Assert.AreEqual(0, svm.ReadRegisterValue(Registers.AA));
-            Assert.AreEqual(1000, svm.ReadRegisterValue(Registers.AB));
+            Assert.AreEqual(0, svm.ReadRegisterValue(Registers.R16A));
+            Assert.AreEqual(1000, svm.ReadRegisterValue(Registers.R32A));
         }
 
         [TestMethod]
@@ -211,12 +211,12 @@ namespace SVMT
                 program.AddBytes(Bytecodes.Inc_Stack, Sizes.WORD);
             }
 
-            program.AddBytes(Bytecodes.CopyStack, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
+            program.AddBytes(Bytecodes.CopyStack, Registers.R16A, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            Assert.AreEqual(1000, svm.ReadRegisterValue(Registers.AA));
+            Assert.AreEqual(1000, svm.ReadRegisterValue(Registers.R16A));
         }
 
         [TestMethod]
@@ -231,12 +231,12 @@ namespace SVMT
                 program.AddBytes(Bytecodes.Dec_Stack, Sizes.WORD);
             }
 
-            program.AddBytes(Bytecodes.CopyStack, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
+            program.AddBytes(Bytecodes.CopyStack, Registers.R16A, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
 
             svm.Initialize();
             svm.RunProgram(program);
 
-            Assert.AreEqual(0, svm.ReadRegisterValue(Registers.AA));
+            Assert.AreEqual(0, svm.ReadRegisterValue(Registers.R16A));
         }
 
         [TestMethod]
@@ -250,7 +250,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Nop);    // 9
             program.AddBytes(Bytecodes.Abort);  // 10
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD, 1);
-            program.AddBytes(Bytecodes.CopyStack, Registers.A, Sizes.HWORD, Sizes.HWORD, (byte)(svm.StackLowAddress + 1));
+            program.AddBytes(Bytecodes.CopyStack, Registers.R8A, Sizes.HWORD, Sizes.HWORD, (byte)(svm.StackLowAddress + 1));
 
             svm.Initialize();
             byte result = svm.RunProgram(program);
@@ -258,7 +258,7 @@ namespace SVMT
 
             Assert.AreEqual(0, result, msg);
 
-            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.A));
+            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.R8A));
         }
 
         [TestMethod]
@@ -272,7 +272,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Nop);    // 9
             program.AddBytes(Bytecodes.Abort);  // 10
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD, 1);
-            program.AddBytes(Bytecodes.CopyStack, Registers.A, Sizes.HWORD, Sizes.HWORD, (byte)(svm.StackLowAddress + 1));
+            program.AddBytes(Bytecodes.CopyStack, Registers.R8A, Sizes.HWORD, Sizes.HWORD, (byte)(svm.StackLowAddress + 1));
 
             svm.Initialize();
             byte result = svm.RunProgram(program);
@@ -280,7 +280,7 @@ namespace SVMT
 
             Assert.AreEqual(0, result, msg);
 
-            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.A));
+            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.R8A));
         }
 
         [TestMethod]
@@ -294,7 +294,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Nop);    // 11
             program.AddBytes(Bytecodes.Abort);  // 12
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1, Sizes.WORD);
-            program.AddBytes(Bytecodes.CopyStack, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)(svm.StackLowAddress + 2), 0);
+            program.AddBytes(Bytecodes.CopyStack, Registers.R16A, Sizes.WORD, Sizes.WORD, (byte)(svm.StackLowAddress + 2), 0);
 
             svm.Initialize();
             byte result = svm.RunProgram(program);
@@ -302,7 +302,7 @@ namespace SVMT
 
             Assert.AreEqual(0, result, msg);
 
-            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.AA));
+            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.R16A));
         }
 
         [TestMethod]
@@ -342,7 +342,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(2, Sizes.WORD);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1, Sizes.WORD);
-            program.AddBytes(Bytecodes.CopyStack, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
+            program.AddBytes(Bytecodes.CopyStack, Registers.R16A, Sizes.WORD, Sizes.WORD, (byte)svm.StackLowAddress, 0);
 
             svm.Initialize();
             byte result = svm.RunProgram(program);
@@ -350,7 +350,7 @@ namespace SVMT
 
             Assert.AreEqual(0, result, msg);
 
-            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.AA));
+            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.R16A));
         }
 
         [TestMethod]
@@ -365,7 +365,7 @@ namespace SVMT
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(2, Sizes.WORD);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1, Sizes.WORD);
-            program.AddBytes(Bytecodes.CopyStack, Registers.AA, Sizes.WORD, Sizes.WORD, (byte)(svm.StackLowAddress + 2), 0);
+            program.AddBytes(Bytecodes.CopyStack, Registers.R16A, Sizes.WORD, Sizes.WORD, (byte)(svm.StackLowAddress + 2), 0);
 
             svm.Initialize();
             byte result = svm.RunProgram(program);
@@ -373,7 +373,7 @@ namespace SVMT
 
             Assert.AreEqual(0, result, msg);
 
-            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.AA));
+            Assert.AreEqual(1, svm.ReadRegisterValue(Registers.R16A));
         }
     }
 }

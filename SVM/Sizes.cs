@@ -95,7 +95,7 @@ namespace SVM
             size = size.ToLower();
 
             if (size == "hword") return HWORD;
-            if (size == "word") return WORD;
+            if (size == "word")  return WORD;
             if (size == "lword") return LWORD;
             if (size == "dword") return DWORD;
 

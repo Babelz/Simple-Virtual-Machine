@@ -106,11 +106,19 @@ namespace SVM
 
             arithmeticFunctions = new Action<byte[], byte[], byte[]>[]
             {
-                ByteHelper.AddBytes,
-                ByteHelper.SubtractBytes,
-                ByteHelper.DivideBytes,
-                ByteHelper.MultiplyBytes,
-                ByteHelper.ModuloFromBytes
+                // Int.
+                ByteHelper.AddIntBytes,
+                ByteHelper.SubtractIntBytes,
+                ByteHelper.DivideIntBytes,
+                ByteHelper.MultiplyIntBytes,
+                ByteHelper.ModuloFromIntBytes,
+
+                // Float.
+                ByteHelper.AddFloatBytes,
+                ByteHelper.SubtractFloatBytes,
+                ByteHelper.DivideFloatBytes,
+                ByteHelper.MultiplyFloatBytes,
+                ByteHelper.ModuloFromFloatBytes
             };
         }
 
@@ -252,7 +260,7 @@ namespace SVM
 
                 Console.WriteLine(str);
             }
-            else if (flags[0] == Flags.NUM)
+            else if (flags[0] == Flags.INT)
             {
                 byte[] valueCache = caches.GetCacheOfSize(count, 2);
 
@@ -680,20 +688,20 @@ namespace SVM
             {
                 byte value = NextProgramByte();
 
-                memory.WriteByte(Registers.FLAGS, value);
+                memory.WriteByte(Registers.RFLAGS, value);
             }
             else if (bytecode == Bytecodes.Set_Flag_Direct)
             {
                 byte register = NextProgramByte();
                 byte value = memory.ReadByte(register);
 
-                memory.WriteByte(Registers.FLAGS, value);
+                memory.WriteByte(Registers.RFLAGS, value);
             }
             else if (bytecode == Bytecodes.Set_Flag_Direct)
             {
                 byte value = memory.ReadByte(sp);
 
-                memory.WriteByte(Registers.FLAGS, value);
+                memory.WriteByte(Registers.RFLAGS, value);
             }
             else if (bytecode == Bytecodes.Print)
             {
@@ -709,7 +717,7 @@ namespace SVM
                 byte[] flagsCache = caches.GetCacheOfSize(1, 1);
 
                 memory.ReadBytes(sp - bytesCount, sp, bytesCache);
-                memory.ReadBytes(Registers.FLAGS, Registers.FLAGS + 1, flagsCache);
+                memory.ReadBytes(Registers.RFLAGS, Registers.RFLAGS + 1, flagsCache);
 
                 Print(flagsCache, bytesCache, bytesCount);
             }
@@ -734,7 +742,7 @@ namespace SVM
                 int bytesCount = ByteHelper.ToInt(bytesCountBytes);
 
                 memory.ReadBytes(lowAddress, highAddress, bytesCache);
-                memory.ReadBytes(Registers.FLAGS, Registers.FLAGS + 1, flagsCache);
+                memory.ReadBytes(Registers.RFLAGS, Registers.RFLAGS + 1, flagsCache);
 
                 Print(flagsCache, bytesCache, bytesCount);
             }
@@ -759,7 +767,7 @@ namespace SVM
                 memory.ReadBytes(sp - aSize, sp, aCache);
                 memory.ReadBytes(sp - aSize - bSize, sp - aSize, bCache);
 
-                arithmeticFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
+                arithmeticFunctions[memory.ReadByte(Registers.RFLAGS)](aCache, bCache, rCache);
 
                 MoveStackPointer(-(aSize + bSize));
 
@@ -782,7 +790,7 @@ namespace SVM
                 memory.ReadBytes(aRegister, aRegister + aRegisterCapacity, aCache);
                 memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
 
-                arithmeticFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
+                arithmeticFunctions[memory.ReadByte(Registers.RFLAGS)](aCache, bCache, rCache);
 
                 memory.WriteBytes(sp, sp + aRegisterCapacity, rCache);
 
@@ -819,7 +827,7 @@ namespace SVM
                 memory.ReadBytes(bRegister, bRegister + bRegisterCapacity, bCache);
                 memory.ReadBytes(rRegister, rRegister + rRegisterCapacity, rCache);
 
-                arithmeticFunctions[memory.ReadByte(Registers.FLAGS)](aCache, bCache, rCache);
+                arithmeticFunctions[memory.ReadByte(Registers.RFLAGS)](aCache, bCache, rCache);
 
                 memory.WriteBytes(rRegister, rRegister + rRegisterCapacity, rCache);
             }
@@ -837,7 +845,7 @@ namespace SVM
 
                 memory.ReadBytes(register, register + size, cache);
 
-                ByteHelper.AddBytes(cache, tCache, rCache);
+                ByteHelper.AddIntBytes(cache, tCache, rCache);
 
                 memory.WriteBytes(register, register + size, rCache);
             }
@@ -856,7 +864,7 @@ namespace SVM
 
                 memory.ReadBytes(sp - size, sp, cache);
 
-                ByteHelper.AddBytes(cache, tCache, rCache);
+                ByteHelper.AddIntBytes(cache, tCache, rCache);
 
                 memory.WriteBytes(sp - size, sp, rCache);
             }
@@ -874,7 +882,7 @@ namespace SVM
 
                 memory.ReadBytes(register, register + size, cache);
 
-                ByteHelper.SubtractBytes(cache, tCache, rCache);
+                ByteHelper.SubtractIntBytes(cache, tCache, rCache);
 
                 memory.WriteBytes(register, register + size, rCache);
             }
@@ -893,7 +901,7 @@ namespace SVM
 
                 memory.ReadBytes(sp - size, sp, cache);
 
-                ByteHelper.SubtractBytes(cache, tCache, rCache);
+                ByteHelper.SubtractIntBytes(cache, tCache, rCache);
 
                 memory.WriteBytes(sp - size, sp, rCache);
             }
@@ -923,49 +931,49 @@ namespace SVM
             sp = Registers.HighAddress;
 
             // Reset pc and retpc registers.
-            pc = retpc = 0;
+            pc = 0;
 
             program = null;
         }
 
-        public void DumpStack()
+        public byte[] DumpStack()
         {
-            byte[] buffer = new byte[memory.HighAddress - 1];
+            byte[] stack = new byte[memory.HighAddress - 1];
 
-            memory.ReadBytes(memory.LowAddress, memory.HighAddress - 1, buffer);
+            memory.ReadBytes(StackLowAddress, StackHighAddress, stack);
 
-            FileHelper.DumpData("Stack dump", buffer, 10, "stackdump.txt");
+            return stack;
         }
-        public void DumpProgram()
+        public byte[] DumpProgram()
         {
-            FileHelper.DumpData("Program dump", program, 10, "programdump.txt");
+            return program;
         }
-        public void DumpRegisters()
+        public byte[] DumpRegisters()
         {
-            byte[] buffer = new byte[Registers.HighAddress];
+            byte[] registers = new byte[Registers.HighAddress];
 
-            memory.ReadBytes(Registers.LowAddress, Registers.HighAddress - 1, buffer);
+            memory.ReadBytes(Registers.LowAddress, Registers.HighAddress - 1, registers);
 
-            FileHelper.DumpRegisters("Registers", buffer, "registers.txt");
+            return registers;
         }
 
         public byte[] ReadMemoryBytes(int lowAddress, int highAddress)
         {
-            byte[] buffer = new byte[highAddress - lowAddress];
+            byte[] chunk = new byte[highAddress - lowAddress];
 
-            memory.ReadBytes(lowAddress, highAddress, buffer);
+            memory.ReadBytes(lowAddress, highAddress, chunk);
 
-            return buffer;
+            return chunk;
         }
         public int ReadRegisterValue(byte register)
         {
             byte registerCapacity = Registers.RegisterCapacity(register);
 
-            byte[] buffer = new byte[registerCapacity];
+            byte[] cache = new byte[registerCapacity];
 
-            memory.ReadBytes(register, register + registerCapacity, buffer);
+            memory.ReadBytes(register, register + registerCapacity, cache);
 
-            return ByteHelper.ToInt(buffer);
+            return ByteHelper.ToInt(cache);
         }
 
         public byte RunProgram(byte[] program)
@@ -999,10 +1007,6 @@ namespace SVM
                 Console.WriteLine("PC: " + pc);
                 Console.WriteLine("SP: " + sp);
                 Console.WriteLine("Dumping stack, program memory and registers to root");
-
-                DumpStack();
-                DumpProgram();
-                DumpRegisters();
 
                 return ReturnCodes.DEBUG_EXCEPTION;
             }

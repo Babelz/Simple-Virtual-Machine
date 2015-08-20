@@ -29,7 +29,7 @@ namespace SVM
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 1, 0);
 
-            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.ADD);
+            program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_ADD);
 
             for (int i = 0; i < 1000000; i++)
             {
@@ -37,7 +37,7 @@ namespace SVM
                 program.AddBytes(Bytecodes.Arithmetic_Stack, Sizes.WORD, Sizes.WORD);
             }
 
-            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.BA);
+            program.AddBytes(Bytecodes.Top, Sizes.WORD, Registers.R16B);
 
             for (int i = 0; i < int.MaxValue; i++)
             {
@@ -63,7 +63,7 @@ namespace SVM
 
             Console.WriteLine("End...");
             Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds);
-            Console.WriteLine("BA: " + svm.ReadRegisterValue(Registers.BA));
+            Console.WriteLine("BA: " + svm.ReadRegisterValue(Registers.R16B));
             Console.WriteLine();
         }
     }

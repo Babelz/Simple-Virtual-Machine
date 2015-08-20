@@ -67,25 +67,25 @@ namespace SVM
         #region Fields
         // Table containing all the caches.
         // Used for fast addressing.
-        private readonly byte[][] transitionTable;
+        private readonly byte[][] caches;
 
         // 1-byte caches.
-        private readonly byte[] aCache;
-        private readonly byte[] aaCache;
-        private readonly byte[] bCache;
-        private readonly byte[] bbCache;
+        private readonly byte[] c8a;
+        private readonly byte[] c8b;
+        private readonly byte[] c8c;
+        private readonly byte[] c8d;
 
         // 2-byte caches.
-        private readonly byte[] cCache;
-        private readonly byte[] ccCache;
-        private readonly byte[] dCache;
-        private readonly byte[] ddCache;
+        private readonly byte[] c16a;
+        private readonly byte[] c16b;
+        private readonly byte[] c16c;
+        private readonly byte[] c16d;
 
         // 4-byte caches.
-        private readonly byte[] eCache;
-        private readonly byte[] eeCache;
-        private readonly byte[] fCache;
-        private readonly byte[] ffCache;
+        private readonly byte[] c32a;
+        private readonly byte[] c32b;
+        private readonly byte[] c32c;
+        private readonly byte[] c32d;
 
         /// <summary>
         /// Main, dynamic cache chunk.
@@ -93,7 +93,7 @@ namespace SVM
         ///       Otherwise, turn this cache to static
         ///       as well.
         /// </summary>
-        private byte[] mCache;
+        private byte[] cm;
         #endregion
 
         #region Properties
@@ -101,48 +101,48 @@ namespace SVM
         {
             get
             {
-                return mCache.Length;
+                return cm.Length;
             }
         }
         #endregion
 
         public CacheManager(int initialChunkSize)
         {
-            aCache = new byte[1];
-            aaCache = new byte[1];
-            bCache = new byte[1];
-            bbCache = new byte[1];
+            c8a = new byte[1];
+            c8b = new byte[1];
+            c8c = new byte[1];
+            c8d = new byte[1];
 
-            cCache = new byte[2];
-            ccCache = new byte[2];
-            dCache = new byte[2];
-            ddCache = new byte[2];
+            c16a = new byte[2];
+            c16b = new byte[2];
+            c16c = new byte[2];
+            c16d = new byte[2];
 
-            eCache = new byte[4];
-            eeCache = new byte[4];
-            fCache = new byte[4];
-            ffCache = new byte[4];
+            c32a = new byte[4];
+            c32b = new byte[4];
+            c32c = new byte[4];
+            c32d = new byte[4];
 
-            mCache = new byte[initialChunkSize];
+            cm = new byte[initialChunkSize];
 
-            transitionTable = new byte[13][]
+            caches = new byte[13][]
             {
-                aCache,
-                aaCache,
-                bCache,
-                bbCache,
+                c8a,
+                c8b,
+                c8c,
+                c8d,
                 
-                cCache,
-                ccCache,
-                dCache,
-                ddCache,
+                c16a,
+                c16b,
+                c16c,
+                c16d,
                 
-                eCache,
-                eeCache,
-                fCache,
-                ffCache,
+                c32a,
+                c32b,
+                c32c,
+                c32d,
 
-                mCache
+                cm
             };
         }
 
@@ -152,7 +152,7 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearCaches()
         {
-            for (int i = 0; i < transitionTable.Length; i++) ClearCache(i, 0);
+            for (int i = 0; i < caches.Length; i++) ClearCache(i, 0);
         }
         /// <summary>
         /// Clears given size cache at given offset.
@@ -178,7 +178,7 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] GetCache(int address)
         {
-            return transitionTable[address];
+            return caches[address];
         }
 
         /// <summary>
@@ -190,10 +190,10 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] GetCacheOfSize(int size, int offset)
         {
-            if      (size == 1)  return transitionTable[0 + offset];
-            else if (size == 2)  return transitionTable[4 + offset];
-            else if (size == 4)  return transitionTable[8 + offset];
-            else                 return transitionTable[M_CACHE];
+            if      (size == 1)  return caches[0 + offset];
+            else if (size == 2)  return caches[4 + offset];
+            else if (size == 4)  return caches[8 + offset];
+            else                 return caches[M_CACHE];
          }
     }
 }

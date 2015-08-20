@@ -91,6 +91,9 @@ namespace SVM
         // Temp variables used with functions.
         private static readonly int[] aIntCache = new int[1];
         private static readonly int[] bIntCache = new int[1];
+
+        private static readonly float[] aFloatCache = new float[1];
+        private static readonly float[] bFloatCache = new float[1];
         #endregion
 
         #region Word ones
@@ -150,7 +153,7 @@ namespace SVM
         #endregion
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private unsafe static void ProcessBytecodeOperation(byte[] lhs, byte[] rhs, byte[] results, ByteOperation operation)
+        private unsafe static void ProcessIntBytecodeOperation(byte[] lhs, byte[] rhs, byte[] results, ByteOperation operation)
         {
             aIntCache[0] = 0;
             bIntCache[0] = 0;
@@ -194,6 +197,53 @@ namespace SVM
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe static void ProcessFloatBytecodeOperation(byte[] lhs, byte[] rhs, byte[] results, ByteOperation operation)
+        {
+            aFloatCache[0] = 0.0f;
+            bFloatCache[0] = 0.0f;
+
+            fixed (byte* resultPtr = results)
+            {
+                fixed (float* lhsPtr = aFloatCache)
+                fixed (float* rhsPtr = bFloatCache)
+                {
+                    byte* lhsValPtr = (byte*)lhsPtr;
+                    byte* rhsValPtr = (byte*)rhsPtr;
+
+                    for (int i = 0; i < lhs.Length; i++) lhsValPtr[i] = lhs[i];
+                    for (int i = 0; i < rhs.Length; i++) rhsValPtr[i] = rhs[i];
+
+                    float value = 0.0f;
+
+                    switch (operation)
+                    {
+                        case ByteOperation.Add:
+                            value = aFloatCache[0] + bFloatCache[0];
+                            break;
+                        case ByteOperation.Sub:
+                            value = aFloatCache[0] - bFloatCache[0];
+                            break;
+                        case ByteOperation.Div:
+                            value = aFloatCache[0] / bFloatCache[0];
+                            break;
+                        case ByteOperation.Mul:
+                            value = aFloatCache[0] * bFloatCache[0];
+                            break;
+                        case ByteOperation.Mod:
+                            value = aFloatCache[0] % bFloatCache[0];
+                            break;
+                        default:
+                            break;
+                    }
+
+                    *(float*)resultPtr = value;
+                }
+            }
+        }
+
+        // TODO: float processing.
+
         /// <summary>
         /// Converts given bytes to integer. Currently supports
         /// max 4-bytes.
@@ -203,12 +253,16 @@ namespace SVM
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ToInt(params byte[] results)
         {
-            // TODO: optimize.
             if      (results.Length == 1) return results[0];
             else if (results.Length == 2) return BitConverter.ToInt16(results, 0);
             else if (results.Length == 4) return BitConverter.ToInt32(results, 0);
 
             return 0;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ToFloat(params byte[] results)
+        {
+            return BitConverter.ToSingle(results, 0);
         }
 
         /// <summary>
@@ -223,7 +277,13 @@ namespace SVM
         {
             fixed (byte* resultPtr = results) *(int*)resultPtr = value;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static void ToBytes(float value, byte[] results)
+        {
+            fixed (byte* resultPtr = results) *(float*)resultPtr = value;
+        }
 
+        #region Integer functions
         /// <summary>
         /// Adds two variables presented as bytes together 
         /// and returns the result to the caller. This function supports
@@ -233,34 +293,67 @@ namespace SVM
         /// <param name="rhs">right hand side bytes</param>
         /// <returns>lhs + rhs</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void AddBytes(byte[] lhs, byte[] rhs, byte[] results)
+        public unsafe static void AddIntBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Add);
+            ByteHelper.ProcessIntBytecodeOperation(lhs, rhs, results, ByteOperation.Add);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SubtractBytes(byte[] lhs, byte[] rhs, byte[] results)
+        public static void SubtractIntBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Sub);
+            ByteHelper.ProcessIntBytecodeOperation(lhs, rhs, results, ByteOperation.Sub);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DivideBytes(byte[] lhs, byte[] rhs, byte[] results)
+        public static void DivideIntBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Div);
+            ByteHelper.ProcessIntBytecodeOperation(lhs, rhs, results, ByteOperation.Div);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void MultiplyBytes(byte[] lhs, byte[] rhs, byte[] results)
+        public static void MultiplyIntBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Mul);
+            ByteHelper.ProcessIntBytecodeOperation(lhs, rhs, results, ByteOperation.Mul);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ModuloFromBytes(byte[] lhs, byte[] rhs, byte[] results)
+        public static void ModuloFromIntBytes(byte[] lhs, byte[] rhs, byte[] results)
         {
-            ByteHelper.ProcessBytecodeOperation(lhs, rhs, results, ByteOperation.Mod);
+            ByteHelper.ProcessIntBytecodeOperation(lhs, rhs, results, ByteOperation.Mod);
         }
+        #endregion
+
+        #region Float functions
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static void AddFloatBytes(byte[] lhs, byte[] rhs, byte[] results)
+        {
+            ByteHelper.ProcessFloatBytecodeOperation(lhs, rhs, results, ByteOperation.Add);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SubtractFloatBytes(byte[] lhs, byte[] rhs, byte[] results)
+        {
+            ByteHelper.ProcessFloatBytecodeOperation(lhs, rhs, results, ByteOperation.Sub);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DivideFloatBytes(byte[] lhs, byte[] rhs, byte[] results)
+        {
+            ByteHelper.ProcessFloatBytecodeOperation(lhs, rhs, results, ByteOperation.Div);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void MultiplyFloatBytes(byte[] lhs, byte[] rhs, byte[] results)
+        {
+            ByteHelper.ProcessFloatBytecodeOperation(lhs, rhs, results, ByteOperation.Mul);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ModuloFromFloatBytes(byte[] lhs, byte[] rhs, byte[] results)
+        {
+            ByteHelper.ProcessFloatBytecodeOperation(lhs, rhs, results, ByteOperation.Mod);
+        }
+        #endregion
 
         public static string ToBinaryString(byte[] bytes)
         {

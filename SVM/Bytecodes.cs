@@ -207,21 +207,21 @@ namespace SVM
         /// <summary>
         /// Executes math operation with two top of the stack and store result on the stack.
         /// 
-        /// Math [size (word)] [size (word)]
+        /// arth [size (word)] [size (word)]
         /// </summary>
         public const byte Arithmetic_Stack = 0x0000;
 
         /// <summary>
         /// Executes math operation with two register values and stores result on the stack.
         /// 
-        /// Math [register_a] [register_b]
+        /// arth [register_a] [register_b]
         /// </summary>
         public const byte Arithmetic_Register = 0x0001;
         
         /// <summary>
         /// Executes math operation with two register values and stores result to given register.
         /// 
-        /// Math [register_a] [register_b] [result register]
+        /// arth [register_a] [register_b] [result register]
         /// </summary>
         public const byte Arithmetic_Register_Register = 0x0002;
 
@@ -297,6 +297,19 @@ namespace SVM
         /// </summary>
         public const byte Print_Offset = 0x007D;
 
+        /// <summary>
+        /// Prints given amount of bytes from the stack.
+        /// 
+        /// print [bytes]
+        /// </summary>
+        public const byte Print_Direct = 0x007E;
+
+        /// <summary>
+        /// Prints given amount of bytes contained inside a register.
+        /// 
+        /// print [register address]
+        /// </summary>
+        public const byte Print_Register = 0x007F;
         #endregion
     }
 }
