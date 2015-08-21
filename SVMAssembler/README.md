@@ -1,43 +1,43 @@
 # List of all opcodes
 
-## push
+push
 ------
 
 Pushes a value to the stack.
 
-### push [word][value]
+push [word][value]
 - Pushes a specific sized value to the stack. 
 
-### push8	[value] 
+push8	[value] 
 - Pushes a 8-bit value to the stack.
 
-### push16 [value]
+push16 [value]
 - Pushes a 16-bit value to the stack.
 
-### push32 [value]
+push32 [value]
 - Pushes a 32-bit value to the stack.
 
-### pushreg [register_name]
+pushreg [register_name]
 - Pushes a given register value to the stack. Register will not be cleared.
 
-## pop
+pop
 ------
 
 Removes a value from top of the stack.
 
-### pop	[count]
+pop	[count]
 - Remove given amount of bytes from the stack.
 
-### pop [register_name]
+pop [register_name]
 - Remove given amount of bytes contained inside a register from the stack.
 
-### pop8
+pop8
 - Remove one byte from the stack.
 
-### pop16
+pop16
 - Remove two bytes from the stack.
 
-### pop32
+pop32
 - Remove four bytes from the stack
 
 ## top
@@ -46,7 +46,7 @@ Removes a value from top of the stack.
 Copy given amount of bytes from the top of the stack to given register
 or to given heap address.
 
-### top [bytescount] [register]
+top [bytescount] [register]
 - Copy given amount of bytes to given register.
 
 ## sp
@@ -61,18 +61,18 @@ Store stack pointers location to given register.
 
 Push given amount of bytes to the stack.
 
-### pusb [element size] [elements]
+pusb [element size] [elements]
 
-## ldstr
+ldstr
 ------
 
 Loads given string to the stack.
 
-### ldstr "[string]"
+dstr "[string]"
 
-## ldch
+ldch
 ------
 
 Loads given character to the stack
 
-### ldch '[character]'
+ldch '[character]'
