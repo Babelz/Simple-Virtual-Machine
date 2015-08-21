@@ -6,15 +6,62 @@ using System.Threading.Tasks;
 
 namespace SVMAssembler
 {
+    public enum TokenType
+    {
+        Declaration,
+        Opcode
+    }
+
     public sealed class Token
     {
-        public readonly Opcode Opcode;
-        public readonly string[] Args;
+        #region Fields
+        private string[] arguments;
+        #endregion
 
-        public Token(Opcode opcode, string[] args)
+        #region Properties
+        public TokenType Type
         {
-            Opcode = opcode;
-            Args = args;
+            get;
+            private set;
+        }
+        public string Header
+        {
+            get;
+            private set;
+        }
+
+        public string RawLine
+        {
+            get;
+            private set;
+        }
+        public int Linenumber
+        {
+            get;
+            private set;
+        }
+        public int ArgumentsCount
+        {
+            get
+            {
+                return arguments.Length;
+            }
+        }
+        #endregion
+
+        public Token(TokenType type, string header, string[] arguments, string rawLine, int linenumber)
+        {
+            this.arguments = arguments;
+            
+            Type = type;
+            Header = header;
+            RawLine = rawLine;
+            Linenumber = linenumber;
+        }
+
+        public string ArgumentAtIndex(int index)
+        {
+            return arguments[index];
         }
     }
 
@@ -24,25 +71,40 @@ namespace SVMAssembler
         {
         }
 
-        /*
-         * Simple tokenizer, can only handle one operation code per 
-         * line.
-         * 
-         * Example of working lines:
-         *  push8 32
-         *  push32 128
-         *  
-         * Example of invalid line:
-         *  push8 32 push32 128
-         *  
-         * So one operation code + its args per line.
-         */
-
-        public IEnumerable<Opcode> Tokenize(string[] lines)
+        public IEnumerable<Token> Tokenize(string[] lines)
         {
-            List<Opcode> tokens = new List<Opcode>();
+            List<Token> result = new List<Token>();
 
-            return tokens;
+            // Excepting that the lines are trimmed
+            // by the parser.
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+
+                if (string.IsNullOrEmpty(line)) continue;
+
+                string[] tokens = line.Split(' ', ',');
+
+                if (Statements.IsInstruction(tokens[0]))
+                {
+                    // Is an opcode.
+                    TokenType type = TokenType.Opcode;
+                    string instruction = tokens[0].Trim();
+                    string[] arguments = new string[tokens.Length - 1];
+                    string rawLine = line;
+                    int linenumber = i + 1;
+
+                    // Copy args.
+                    Array.Copy(tokens, 1, arguments, 0, arguments.Length);
+
+                    // Remove unwanted characters and trim.
+                    arguments = arguments.Select(s => s.Replace(",", "").Trim()).ToArray();
+
+                    result.Add(new Token(type, instruction, arguments, rawLine, linenumber));
+                }
+            }
+
+            return result;
         }
     }
 }

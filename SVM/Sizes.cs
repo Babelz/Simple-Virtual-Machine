@@ -89,26 +89,5 @@ namespace SVM
         /// 2 097 152
         /// </summary>
         public const int CHUNK_2048KB = 2097152;
-
-        public static byte ToByte(string size)
-        {
-            size = size.ToLower();
-
-            if (size == "hword") return HWORD;
-            if (size == "word")  return WORD;
-            if (size == "lword") return LWORD;
-            if (size == "dword") return DWORD;
-
-            return 0;
-        }
-        public static string ToString(byte size)
-        {
-            if (size == 1) return "hword";
-            if (size == 2) return "word";
-            if (size == 4) return "lword";
-            if (size == 8) return "dword";
-
-            return string.Empty;
-        }
     }
 }

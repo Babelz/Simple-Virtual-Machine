@@ -10,29 +10,53 @@ namespace SVMAssembler
 {
     public static class Statements
     {
-        public static readonly Regex Word;
-        public static readonly Regex IdentifierReference;
-        public static readonly Regex Number;
-        public static readonly Regex Address;
+        private static readonly Regex word;
+        private static readonly Regex number;
+        private static readonly Regex register;
 
-        public static readonly Regex Add_RegReg;
-        public static readonly Regex Add_RegVal;
-        public static readonly Regex Add_ValVal;
-        public static readonly Regex Add_Size;
-        public static readonly Regex Add_SizeSize;
-        public static readonly Regex Add_IDReg;
-        public static readonly Regex Add_IDValue;
-        public static readonly Regex Add_IDID;
+        private static readonly Regex push;
+        private static readonly Regex pop;
 
-        public static ReadOnlyCollection<Regex> Add;
+        private static readonly Regex instruction;
 
         static Statements()
         {
+            word = CreateRegex("(hword|word|lword|dword)");
+            number = CreateRegex(@"\d+");
+            register = CreateRegex(@"r\d{1,2}\w{1}");
+
+            push = CreateRegex("push");
+            pop = CreateRegex("pop");
+            
+            instruction = new Regex(string.Format("({0}|{1})", push, pop));
         }
 
         private static Regex CreateRegex(string pattern)
         {
             return new Regex(pattern, RegexOptions.Compiled);
+        }
+        
+        public static bool IsWord(string str)
+        {
+            return word.IsMatch(str);
+        }
+        public static bool IsNumber(string str) 
+        {
+            return number.IsMatch(str);
+        }
+        public static bool IsRegister(string str) 
+        {
+            return register.IsMatch(str);
+        }
+
+        public static bool IsInstruction(string str) 
+        {
+            return instruction.IsMatch(str);
+        }
+
+        public static bool IsPush(string str) 
+        {
+            return push.IsMatch(str);
         }
     }
 }

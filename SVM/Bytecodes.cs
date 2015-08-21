@@ -38,6 +38,13 @@ namespace SVM
         public const byte Pop = 0x0082;
 
         /// <summary>
+        /// Pops given amount of bytes pointed by a register.
+        /// 
+        /// pop [register address]
+        /// </summary>
+        public const byte Pop_Register = 0x0086;
+
+        /// <summary>
         /// top [bytes count] [register address] 
         ///
         /// Copies the given amount of bytes from the top of the stack to the given register.

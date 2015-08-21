@@ -7,30 +7,30 @@ using System.Threading.Tasks;
 
 namespace SVM
 {
-    public sealed class BytecodeProgram
+    public sealed class BytecodeBuffer
     {
         #region Fields
         private readonly List<byte> bytes;
         #endregion
 
-        public BytecodeProgram()
+        public BytecodeBuffer()
         {
             bytes = new List<byte>();
         }
 
-        public BytecodeProgram InsertBytes(int startIndex, params byte[] bytes)
+        public BytecodeBuffer InsertBytes(int startIndex, params byte[] bytes)
         {
             this.bytes.InsertRange(startIndex, bytes);
             
             return this;
         }
-        public BytecodeProgram AddBytes(params byte[] bytes)
+        public BytecodeBuffer AddBytes(params byte[] bytes)
         {
             this.bytes.AddRange(bytes);
 
             return this;
         }
-        public BytecodeProgram AddValue(int value, int bytes)
+        public BytecodeBuffer AddValue(int value, int bytes)
         {
             byte[] buffer = new byte[bytes];
 
@@ -46,7 +46,7 @@ namespace SVM
             return bytes.ToArray();
         }
 
-        public static implicit operator byte[](BytecodeProgram program)
+        public static implicit operator byte[](BytecodeBuffer program)
         {
             return program.bytes.ToArray();
         }

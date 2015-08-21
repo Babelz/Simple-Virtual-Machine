@@ -32,10 +32,6 @@ namespace SVMAssembler
 
                 lines[i] = line;
             }
-
-            // Remove all empty lines.
-            lines = lines.Where(l => !string.IsNullOrWhiteSpace(l))
-                         .ToArray();
         }
     }
 }

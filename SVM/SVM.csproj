@@ -67,7 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentRegister.cs" />
-    <Compile Include="BytecodeProgram.cs" />
+    <Compile Include="BytecodeBuffer.cs" />
     <Compile Include="ByteHelper.cs" />
     <Compile Include="CacheManager.cs" />
     <Compile Include="Flags.cs" />

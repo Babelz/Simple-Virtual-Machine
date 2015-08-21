@@ -15,7 +15,7 @@ namespace SVM
     class Program
     {
         static VirtualMachine svm = new VirtualMachine(); 
-        static BytecodeProgram program = new BytecodeProgram();
+        static BytecodeBuffer program = new BytecodeBuffer();
         static Stopwatch sw = new Stopwatch();
 
         private static void StartLoggerThread()

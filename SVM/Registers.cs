@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SVM
@@ -72,13 +73,17 @@ namespace SVM
         /// </summary>
         public const byte RFLAGS = 81;
 
+        static Registers()
+        {
+        }
+
         /// <summary>
         /// Returns the size of given register in bytes.
         /// </summary>
         /// <param name="lowAddress">start address of the register</param>
         /// <returns>size of the register in bytes</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte RegisterCapacity(byte lowAddress)
+        public static byte GetRegisterCapacity(byte lowAddress)
         {
             if      (lowAddress >= R8A && lowAddress <= R8C)        return 1;
             else if (lowAddress >= R16A && lowAddress <= R16D)      return 2;

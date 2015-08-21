@@ -21,7 +21,7 @@ namespace SVMT
         public void Add_DirectStack_Tests()
         {
             // Add direct stack.
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 8, 0);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 7, 0);
@@ -48,7 +48,7 @@ namespace SVMT
                 byte lbs2 = (byte)(i + r.Next(0, 64));
 
                 // Add direct stack.
-                BytecodeProgram program = new BytecodeProgram();
+                BytecodeBuffer program = new BytecodeBuffer();
                 program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_ADD);
                 program.AddBytes(Bytecodes.Load, Registers.R32A, Sizes.LWORD, lbs1, 0, 0, 0);
                 program.AddBytes(Bytecodes.Load, Registers.R32B, Sizes.LWORD, lbs2, 0, 0, 0);
@@ -69,7 +69,7 @@ namespace SVMT
         [TestMethod]
         public void Add_IndirectRegister_Register_Tests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Load, Registers.R16A, Sizes.WORD, 1, 0);
             program.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_ADD);
@@ -97,7 +97,7 @@ namespace SVMT
         public void Sub_DirectStack_Tests()
         {
             // Add direct stack.
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             // a - b..
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD, 10, 0);
@@ -125,7 +125,7 @@ namespace SVMT
                 byte lbs2 = (byte)(i + r.Next(0, 64));
 
                 // Add direct stack.
-                BytecodeProgram program1 = new BytecodeProgram();
+                BytecodeBuffer program1 = new BytecodeBuffer();
                 program1.AddBytes(Bytecodes.Set_Flag_Direct, Flags.INT_SUB);
                 program1.AddBytes(Bytecodes.Load, Registers.R32B, Sizes.LWORD, Math.Min(lbs1, lbs2), 0, 0, 0);
                 program1.AddBytes(Bytecodes.Load, Registers.R32A, Sizes.LWORD, Math.Max(lbs1, lbs2), 0, 0, 0);
@@ -144,7 +144,7 @@ namespace SVMT
         [TestMethod]
         public void Sub_IndirectRegister_Register_Tests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Load, Registers.R16A, Sizes.WORD).AddValue(1000, 2);
             program.AddBytes(Bytecodes.Load, Registers.R16B, Sizes.WORD, 1, 0);
@@ -166,7 +166,7 @@ namespace SVMT
         [TestMethod]
         public void IncReg_Tests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
             
             for (int i = 0; i < 1000; i++)
             {
@@ -182,7 +182,7 @@ namespace SVMT
         [TestMethod]
         public void DecReg_Tests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Load, Registers.R16A, Sizes.WORD).AddValue(1000, Sizes.WORD);
             program.AddBytes(Bytecodes.Load, Registers.R32A, Sizes.WORD).AddValue(1000, Sizes.WORD);
@@ -202,7 +202,7 @@ namespace SVMT
         [TestMethod]
         public void IncStack_Tests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(0, Sizes.WORD);
 
@@ -222,7 +222,7 @@ namespace SVMT
         [TestMethod]
         public void DecStack_Tests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(1000, Sizes.WORD);
 
@@ -242,7 +242,7 @@ namespace SVMT
         [TestMethod]
         public void JezTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD, 0);
             program.AddBytes(Bytecodes.Jez, Sizes.HWORD, Sizes.HWORD).AddValue(11, Sizes.HWORD);
             program.AddBytes(Bytecodes.Nop);
@@ -264,7 +264,7 @@ namespace SVMT
         [TestMethod]
         public void JgzTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD, 1);
             program.AddBytes(Bytecodes.Jgz, Sizes.HWORD, Sizes.HWORD).AddValue(11, Sizes.HWORD);
             program.AddBytes(Bytecodes.Nop);
@@ -286,7 +286,7 @@ namespace SVMT
         [TestMethod]
         public void JlzTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(-5, Sizes.WORD);
             program.AddBytes(Bytecodes.Jlz, Sizes.WORD, Sizes.WORD).AddValue(13, Sizes.WORD);
             program.AddBytes(Bytecodes.Nop);
@@ -308,7 +308,7 @@ namespace SVMT
         [TestMethod]
         public void EqTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD).AddValue(10, Sizes.HWORD);
             program.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD).AddValue(10, Sizes.HWORD);
@@ -325,7 +325,7 @@ namespace SVMT
         [TestMethod]
         public void NeqTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
 
             svm.Initialize();
             svm.RunProgram(program);
@@ -334,7 +334,7 @@ namespace SVMT
         [TestMethod]
         public void JumpTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
             program.AddBytes(Bytecodes.Jmp, Sizes.WORD).AddValue(12, Sizes.WORD);
             program.AddBytes(Bytecodes.Nop);
             program.AddBytes(Bytecodes.Nop);
@@ -356,7 +356,7 @@ namespace SVMT
         [TestMethod]
         public void JumpStackTests()
         {
-            BytecodeProgram program = new BytecodeProgram();
+            BytecodeBuffer program = new BytecodeBuffer();
             program.AddBytes(Bytecodes.Push_Direct, Sizes.WORD).AddValue(14, Sizes.WORD);
             program.AddBytes(Bytecodes.Jmp_Stack, Sizes.WORD);
             program.AddBytes(Bytecodes.Nop);
