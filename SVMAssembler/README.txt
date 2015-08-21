@@ -1,5 +1,7 @@
-﻿-----------------------------------------------------------
-	push
+﻿	#List of all opcodes
+
+-----------------------------------------------------------
+	##push
 
 Pushes a value to the stack.
 
@@ -23,7 +25,7 @@ pushreg <register_name>
 
 
 -----------------------------------------------------------
-	pop
+	##pop
 
 Removes a value from top of the stack.
 
@@ -47,7 +49,7 @@ pop32
 
 
 -----------------------------------------------------------
-	top
+	##top
 
 Copy given amount of bytes from the top of the stack to given register
 or to given heap address.
@@ -59,7 +61,7 @@ top <bytescount> <register>
 
 
 -----------------------------------------------------------
-	sp
+	##sp
 
 Store stack pointers location to given register.
 
@@ -69,7 +71,7 @@ sp <register>
 
 
 -----------------------------------------------------------
-	pushb
+	##pushb
 
 Push given amount of bytes to the stack.
 
@@ -79,7 +81,7 @@ pusb <element size> <elements>
 
 
 -----------------------------------------------------------
-	ldstr
+	##ldstr
 
 Loads given string to the stack.
 
@@ -89,9 +91,9 @@ ldstr "<string>"
 
 
 -----------------------------------------------------------
-	ldch
+	##ldch
 
 Loads given character to the stack
 
-ldcha '<character>'
+ldch '<character>'
 -----------------------------------------------------------
