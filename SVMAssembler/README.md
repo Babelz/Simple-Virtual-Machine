@@ -4,18 +4,16 @@
 
 Pushes a value to the stack.
 
-### push	[word][value]
+### push [word][value]
 - Pushes a specific sized value to the stack. 
-```
-push8	[value] 
-```
+
+### push8	[value] 
 - Pushes a 8-bit value to the stack.
-```
-push16	[value]
-```
+
+### push16 [value]
 - Pushes a 16-bit value to the stack.
 
-### push32	[value]
+### push32 [value]
 - Pushes a 32-bit value to the stack.
 
 ### pushreg [register_name]
@@ -25,10 +23,10 @@ push16	[value]
 
 Removes a value from top of the stack.
 
-### pop		[count]
+### pop	[count]
 - Remove given amount of bytes from the stack.
 
-### pop		[register_name]
+### pop [register_name]
 - Remove given amount of bytes contained inside a register from the stack.
 
 ### pop8
