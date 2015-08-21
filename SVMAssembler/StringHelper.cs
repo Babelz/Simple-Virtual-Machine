@@ -51,8 +51,8 @@ namespace SVMAssembler
             float f = 0.0f;
             int i = 0;
 
-            if      (float.TryParse(value, out f))  ByteHelper.ToBytes(f, results);
-            else if (int.TryParse(value, out i))    ByteHelper.ToBytes(i, results);
+            if           (int.TryParse(value, out i))    ByteHelper.ToBytes(i, results);
+            else if      (float.TryParse(value, out f))  ByteHelper.ToBytes(f, results);
 
             return results;
         }

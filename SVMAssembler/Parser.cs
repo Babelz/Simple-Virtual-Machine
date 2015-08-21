@@ -14,6 +14,8 @@ namespace SVMAssembler
 
         public void Parse(string[] lines)
         {
+            Logger.Instance.LogMessage("Parsing...");
+
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];

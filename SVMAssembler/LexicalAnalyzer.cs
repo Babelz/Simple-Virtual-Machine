@@ -24,11 +24,11 @@ namespace SVMAssembler
         {
         }
 
-        private bool RequireArgs(Token token, int count)
+        private bool RequireArgCount(Token token, int count)
         {
             return token.ArgumentsCount == count;
         }
-        private bool RequireArgs(Token token, params ArgFlags[] flags)
+        private bool RequireArgTypes(Token token, params ArgFlags[] flags)
         {
             for (int i = 0; i < flags.Length; i++)
             {
@@ -70,35 +70,88 @@ namespace SVMAssembler
 
         private void AnalyzePush(Token token)
         {
-            if (token.Header == Instructions.Push)
+            if (token.Header == Mnemonics.Push)
             {
-                if (!RequireArgs(token, 2)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
-                if (!RequireArgs(token, ArgFlags.Word, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+                if (!RequireArgCount(token, 2)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Word, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
             }
-            else if (token.Header == Instructions.Push8)
+            else if (token.Header == Mnemonics.Push8)
             {
-                if (!RequireArgs(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
-                if (!RequireArgs(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
             }
-            else if (token.Header == Instructions.Push16)
+            else if (token.Header == Mnemonics.Push16)
             {
-                if (!RequireArgs(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
-                if (!RequireArgs(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
             }
-            else if (token.Header == Instructions.Push32)
+            else if (token.Header == Mnemonics.Push32)
             {
-                if (!RequireArgs(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
-                if (!RequireArgs(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
             }
-            else if (token.Header == Instructions.PushReg)
+            else if (token.Header == Mnemonics.PushReg)
             {
-                if (!RequireArgs(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
-                if (!RequireArgs(token, ArgFlags.Register)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Register)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+            }
+        }
+        private void AnalyzePop(Token token)
+        {
+            if (token.Header == Mnemonics.Pop)
+            {
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Number)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+            }
+            else if (token.Header == Mnemonics.PopReg)
+            {
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Register)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+            }
+            else if (token.Header == Mnemonics.Pop8)
+            {
+                if (!RequireArgCount(token, 0)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+            }
+            else if (token.Header == Mnemonics.Pop16)
+            {
+                if (!RequireArgCount(token, 0)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+            }
+            else if (token.Header == Mnemonics.Pop32)
+            {
+                if (!RequireArgCount(token, 0)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+            }
+        }
+        private void AnalyzeLdCh(Token token)
+        {
+            throw new NotImplementedException();
+        }
+        private void AnalyzeLdStr(Token token)
+        {
+            throw new NotImplementedException();
+        }
+        private void AnalyzePushb(Token token)
+        {
+            throw new NotImplementedException();
+        }
+        private void AnalyzeSp(Token token)
+        {
+            throw new NotImplementedException();
+        }
+        private void AnalyzeTop(Token token)
+        {
+            if (token.Header == Mnemonics.Top)
+            {
+                if (!RequireArgCount(token, 2)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Number, ArgFlags.Register)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+            
+                // Validate sizes.
             }
         }
 
         public void Analyze(IEnumerable<Token> tokens)
         {
+            Logger.Instance.LogMessage("Analyzing...");
+
             foreach (Token token in tokens)
             {
                 if (Logger.Instance.HasErrors) break;
@@ -106,6 +159,13 @@ namespace SVMAssembler
                 if (token.Type == TokenType.Opcode)
                 {
                     if (Statements.IsPush(token.Header)) AnalyzePush(token);
+                    else if (Statements.IsPop(token.Header)) AnalyzePop(token);
+                    else if (Statements.IsTop(token.Header)) AnalyzeTop(token);
+                    else if (Statements.IsSp(token.Header)) AnalyzeSp(token);
+                    else if (Statements.IsPushb(token.Header)) AnalyzePushb(token);
+                    else if (Statements.IsLdStr(token.Header)) AnalyzeLdStr(token);
+                    else if (Statements.IsLdCh(token.Header)) AnalyzeLdCh(token);
+                
                 }
                 else if (token.Type == TokenType.Declaration)
                 {

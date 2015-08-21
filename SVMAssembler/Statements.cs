@@ -14,10 +14,18 @@ namespace SVMAssembler
         private static readonly Regex number;
         private static readonly Regex register;
 
+        private static readonly Regex link;
+        private static readonly Regex macro;
+
         private static readonly Regex push;
         private static readonly Regex pop;
+        private static readonly Regex top;
+        private static readonly Regex sp;
+        private static readonly Regex pushb;
+        private static readonly Regex ldstr;
+        private static readonly Regex ldch;
 
-        private static readonly Regex instruction;
+        private static readonly Regex mnemonic;
 
         static Statements()
         {
@@ -25,10 +33,18 @@ namespace SVMAssembler
             number = CreateRegex(@"\d+");
             register = CreateRegex(@"r\d{1,2}\w{1}");
 
+            link = CreateRegex(@"lnk.+\.svma");
+            macro = CreateRegex("#def .+");
+
             push = CreateRegex("push");
             pop = CreateRegex("pop");
+            top = CreateRegex("top");
+            sp = CreateRegex("sp");
+            pushb = CreateRegex("pushb");
+            ldstr = CreateRegex("ldstr");
+            ldch = CreateRegex("ldch");
             
-            instruction = new Regex(string.Format("({0}|{1})", push, pop));
+            mnemonic = CreateRegex(string.Format("({0}|{1})", push, pop));
         }
 
         private static Regex CreateRegex(string pattern)
@@ -49,14 +65,47 @@ namespace SVMAssembler
             return register.IsMatch(str);
         }
 
-        public static bool IsInstruction(string str) 
+        public static bool IsLink(string str)
         {
-            return instruction.IsMatch(str);
+            return link.IsMatch(str);
+        }
+        public static bool IsMacro(string str)
+        {
+            return macro.IsMatch(str);
+        }
+
+        public static bool IsMnemonic(string str) 
+        {
+            return mnemonic.IsMatch(str);
         }
 
         public static bool IsPush(string str) 
         {
             return push.IsMatch(str);
+        }
+        public static bool IsPop(string str)
+        {
+            return pop.IsMatch(str);
+        }
+        internal static bool IsTop(string str)
+        {
+            return top.IsMatch(str);
+        }
+        internal static bool IsSp(string str)
+        {
+            return sp.IsMatch(str);
+        }
+        internal static bool IsPushb(string str)
+        {
+            return pushb.IsMatch(str);
+        }
+        internal static bool IsLdStr(string str)
+        {
+            return ldstr.IsMatch(str);
+        }
+        internal static bool IsLdCh(string str)
+        {
+            return ldch.IsMatch(str);
         }
     }
 }

@@ -46,6 +46,11 @@ namespace SVM
             return bytes.ToArray();
         }
 
+        public void Clear()
+        {
+            bytes.Clear();
+        }
+
         public static implicit operator byte[](BytecodeBuffer program)
         {
             return program.bytes.ToArray();

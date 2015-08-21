@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SVM;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,14 +29,38 @@ namespace SVMAssembler
             Parser p = new Parser();
             p.Parse(prog);
 
+            Linker l = new Linker();
+            l.Link(prog);
+
+            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
+            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
+            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+
             Tokenizer t = new Tokenizer();
             var tt = t.Tokenize(prog);
+
+            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
+            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
+            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
 
             LexicalAnalyzer a = new LexicalAnalyzer();
             a.Analyze(tt);
 
+            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
+            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
+            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+
             CodeGenerator cg = new CodeGenerator();
-            cg.
+            BytecodeBuffer bf = cg.GenerateCode(tt);
+
+            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
+            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
+            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+
+            Console.WriteLine();
+            Console.WriteLine("(string)\tProgram bytes: " + (prog.Select(s => s.Length).Sum() * 8));
+            Console.WriteLine("(bytecode)\tProgram bytes: " + (bf.GetBytes().Length * 8));
+            Console.WriteLine();
 
             return 0;
         }

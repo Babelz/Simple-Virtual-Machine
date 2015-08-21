@@ -1,4 +1,5 @@
-﻿	push
+﻿-----------------------------------------------------------
+	push
 
 Pushes a value to the stack.
 
@@ -17,8 +18,11 @@ push32	<value>
 pushreg <register_name>
 	Pushes a given register value to the stack. Register
 	will not be cleared.
+-----------------------------------------------------------
 
 
+
+-----------------------------------------------------------
 	pop
 
 Removes a value from top of the stack.
@@ -38,3 +42,56 @@ pop16
 
 pop32
 	Remove four bytes from the stack
+-----------------------------------------------------------
+
+
+
+-----------------------------------------------------------
+	top
+
+Copy given amount of bytes from the top of the stack to given register
+or to given heap address.
+
+top <bytescount> <register>
+	Copy given amount of bytes to given register.
+-----------------------------------------------------------
+
+
+
+-----------------------------------------------------------
+	sp
+
+Store stack pointers location to given register.
+
+sp <register>
+-----------------------------------------------------------
+
+
+
+-----------------------------------------------------------
+	pushb
+
+Push given amount of bytes to the stack.
+
+pusb <element size> <elements>
+-----------------------------------------------------------
+
+
+
+-----------------------------------------------------------
+	ldstr
+
+Loads given string to the stack.
+
+ldstr "<string>"
+-----------------------------------------------------------
+
+
+
+-----------------------------------------------------------
+	ldch
+
+Loads given character to the stack
+
+ldcha '<character>'
+-----------------------------------------------------------
