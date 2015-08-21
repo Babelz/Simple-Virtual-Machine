@@ -6,11 +6,13 @@ Pushes a value to the stack.
 
 ### push	[word][value]
 - Pushes a specific sized value to the stack. 
-
-### push8	[value] 
+```
+push8	[value] 
+```
 - Pushes a 8-bit value to the stack.
-
-### push16	[value]
+```
+push16	[value]
+```
 - Pushes a 16-bit value to the stack.
 
 ### push32	[value]
