@@ -61,14 +61,14 @@ pushb
 
 Push given amount of bytes to the stack.
 
-pusb [element size] [elements]
+pushb [element size] [elements]
 
 ldstr
 ------
 
 Loads given string to the stack.
 
-dstr "[string]"
+ldstr "[string]"
 
 ldch
 ------
