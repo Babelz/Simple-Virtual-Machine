@@ -40,7 +40,7 @@ pop16
 pop32
 - Remove four bytes from the stack
 
-## top
+top
 ------
 
 Copy given amount of bytes from the top of the stack to given register
@@ -49,14 +49,14 @@ or to given heap address.
 top [bytescount] [register]
 - Copy given amount of bytes to given register.
 
-## sp
+sp
 ------
 
 Store stack pointers location to given register.
 
-### sp [register]
+sp [register]
 
-## pushb
+pushb
 ------
 
 Push given amount of bytes to the stack.
