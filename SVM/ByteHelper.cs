@@ -367,5 +367,15 @@ namespace SVM
 
             return result;
         }
+
+        public static byte Sizeof(long value)
+        {
+            if (value <= byte.MaxValue) return 1;
+            if (value <= short.MaxValue) return 2;
+            if (value <= Int32.MaxValue) return 4;
+            if (value <= Int64.MaxValue) return 8;
+
+            return 0;
+        }
     }
 }

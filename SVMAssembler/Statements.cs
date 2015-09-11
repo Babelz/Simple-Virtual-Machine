@@ -13,6 +13,8 @@ namespace SVMAssembler
         private static readonly Regex word;
         private static readonly Regex number;
         private static readonly Regex register;
+        private static readonly Regex quotedChar;
+        private static readonly Regex quotedString;
 
         private static readonly Regex link;
         private static readonly Regex macro;
@@ -32,6 +34,8 @@ namespace SVMAssembler
             word = CreateRegex("(hword|word|lword|dword)");
             number = CreateRegex(@"\d+");
             register = CreateRegex(@"r\d{1,2}\w{1}");
+            quotedChar = CreateRegex("'[a-zA-Z]'");
+            quotedString = CreateRegex("\"[a-zA-Z]\"");
 
             link = CreateRegex(@"lnk.+\.svma");
             macro = CreateRegex("#def .+");
@@ -87,25 +91,33 @@ namespace SVMAssembler
         {
             return pop.IsMatch(str);
         }
-        internal static bool IsTop(string str)
+        public static bool IsTop(string str)
         {
             return top.IsMatch(str);
         }
-        internal static bool IsSp(string str)
+        public static bool IsSp(string str)
         {
             return sp.IsMatch(str);
         }
-        internal static bool IsPushb(string str)
+        public static bool IsPushb(string str)
         {
             return pushb.IsMatch(str);
         }
-        internal static bool IsLdStr(string str)
+        public static bool IsLdStr(string str)
         {
             return ldstr.IsMatch(str);
         }
-        internal static bool IsLdCh(string str)
+        public static bool IsLdCh(string str)
         {
             return ldch.IsMatch(str);
+        }
+        public static bool IsCharacter(string str)
+        {
+            return quotedChar.IsMatch(str);
+        }
+        public static bool IsString(string str)
+        {
+            return quotedString.IsMatch(str);
         }
     }
 }

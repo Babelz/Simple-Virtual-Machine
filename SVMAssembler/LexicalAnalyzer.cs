@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SVM;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,8 @@ namespace SVMAssembler
         }
         private bool RequireArgTypes(Token token, params ArgFlags[] flags)
         {
+            if (token.ArgumentsCount >= flags.Length) return false;
+
             for (int i = 0; i < flags.Length; i++)
             {
                 string argument = token.ArgumentAtIndex(i);
@@ -53,11 +56,11 @@ namespace SVMAssembler
                 }
                 if ((flag & ArgFlags.Character) == ArgFlags.Character)
                 {
-                    // TODO: fix.
+                    if (!Statements.IsCharacter(argument)) return false;
                 }
                 if ((flag & ArgFlags.String) == ArgFlags.String)
                 {
-                    // TODO: fix.
+                    if (!Statements.IsString(argument)) return false;
                 }
                 if ((flag & ArgFlags.Register) == ArgFlags.Register)
                 {
@@ -123,11 +126,19 @@ namespace SVMAssembler
         }
         private void AnalyzeLdCh(Token token)
         {
-            throw new NotImplementedException();
+            if (token.Header == Mnemonics.LdCh)
+            {
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.Character)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+            }
         }
         private void AnalyzeLdStr(Token token)
         {
-            throw new NotImplementedException();
+            if (token.Header == Mnemonics.LdStr)
+            {
+                if (!RequireArgCount(token, 1)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
+                if (!RequireArgTypes(token, ArgFlags.String)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
+            }
         }
         private void AnalyzePushb(Token token)
         {
@@ -144,7 +155,17 @@ namespace SVMAssembler
                 if (!RequireArgCount(token, 2)) Logger.Instance.LogError(ErrorHelper.TooFewArguments(token));
                 if (!RequireArgTypes(token, ArgFlags.Number, ArgFlags.Register)) Logger.Instance.LogError(ErrorHelper.InvalidArgument(token));
             
-                // Validate sizes.
+                // top [bytescount] [register]
+                // - Copy given amount of bytes to given register.
+
+                // Validate sizes. Bytes count must be less or equal to the size of 
+                // the register.
+
+                byte register = StringHelper.RegisterToByte(token.ArgumentAtIndex(1));
+                byte registerCapacity = Registers.GetRegisterCapacity(register);
+                byte sizeOfNumber = ByteHelper.Sizeof(long.Parse(token.ArgumentAtIndex(0)));
+
+                if (registerCapacity <= sizeOfNumber) Logger.Instance.LogError(ErrorHelper.SizeMisMatch(token, registerCapacity));
             }
         }
 

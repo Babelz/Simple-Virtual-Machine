@@ -109,6 +109,36 @@ namespace SVMAssembler
 
                     buffer.AddBytes(Bytecodes.Push_Register, register);
                     break;
+                case "top":
+                    register = StringHelper.RegisterToByte(token.ArgumentAtIndex(1));
+                    bytesCount = ByteHelper.Sizeof(long.Parse(token.ArgumentAtIndex(0)));
+
+                    buffer.AddBytes(Bytecodes.Top, bytesCount, register);
+                    break;
+                case "ldch":
+                    string str = token.ArgumentAtIndex(0);
+                    str = str.Substring(str.IndexOf('\''), 1);
+
+                    byteValue = (byte)str.First();
+
+                    buffer.AddBytes(Bytecodes.Push_Direct, Sizes.HWORD, byteValue);
+                    break;
+                case "ldstr":
+                    str = token.ArgumentAtIndex(0);
+                    str = str.Replace("\"", "");
+                    str = str.Trim();
+
+                    bytes = Encoding.ASCII.GetBytes(str);
+
+                    byte elementSize = 1;
+                    int elementsCount = bytes.Length;
+                    byte elementsCountSize = ByteHelper.Sizeof(elementsCount);
+
+                    byte[] elementsCountBytes = new byte[elementsCountSize];
+                    ByteHelper.ToBytes(elementsCount, elementsCountBytes);
+
+                    buffer.AddBytes(Bytecodes.Push_Bytes, elementSize, elementsCountSize).AddBytes(elementsCountBytes).AddBytes(bytes);
+                    break;
                 default:
                     break;
             }
