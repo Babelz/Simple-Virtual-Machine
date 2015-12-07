@@ -32,30 +32,30 @@ namespace SVMAssembler
             Linker l = new Linker();
             l.Link(prog);
 
-            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
-            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
-            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+            Logger.Instance.GetMessages(LogLevel.Message).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Message);
+            Logger.Instance.GetMessages(LogLevel.Warning).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Warning);
+            Logger.Instance.GetMessages(LogLevel.Error).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Error);
 
             Tokenizer t = new Tokenizer();
             var tt = t.Tokenize(prog);
 
-            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
-            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
-            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+            Logger.Instance.GetMessages(LogLevel.Message).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Message);
+            Logger.Instance.GetMessages(LogLevel.Warning).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Warning);
+            Logger.Instance.GetMessages(LogLevel.Error).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Error);
 
             LexicalAnalyzer a = new LexicalAnalyzer();
             a.Analyze(tt);
 
-            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
-            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
-            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+            Logger.Instance.GetMessages(LogLevel.Message).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Message);
+            Logger.Instance.GetMessages(LogLevel.Warning).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Warning);
+            Logger.Instance.GetMessages(LogLevel.Error).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Error);
 
             CodeGenerator cg = new CodeGenerator();
             BytecodeBuffer bf = cg.GenerateCode(tt);
 
-            Logger.Instance.GetMessages().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages();
-            Logger.Instance.GetWarnings().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearWarnings();
-            Logger.Instance.GetErrors().ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearErrors();
+            Logger.Instance.GetMessages(LogLevel.Message).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Message);
+            Logger.Instance.GetMessages(LogLevel.Warning).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Warning);
+            Logger.Instance.GetMessages(LogLevel.Error).ToList().ForEach(s => Console.WriteLine(s)); Logger.Instance.ClearMessages(LogLevel.Error);
 
             Console.WriteLine();
             Console.WriteLine("(string)\tProgram bytes: " + (prog.Select(s => s.Length).Sum() * 8));

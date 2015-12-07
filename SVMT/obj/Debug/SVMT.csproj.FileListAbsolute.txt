@@ -5,3 +5,10 @@ C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\bin\Debug\SVM.pdb
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Debug\SVMT.csprojResolveAssemblyReference.cache
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Debug\SVMT.dll
 C:\Users\Niko\Documents\Visual Studio 2013\Projects\SVM\SVMT\obj\Debug\SVMT.pdb
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\bin\Debug\SVMT.dll
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\bin\Debug\SVMT.pdb
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\bin\Debug\SVM.exe
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\bin\Debug\SVM.pdb
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\obj\Debug\SVMT.csprojResolveAssemblyReference.cache
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\obj\Debug\SVMT.dll
+C:\Users\nikosal\Source\Repos\Simple-Virtual-Machine\SVMT\obj\Debug\SVMT.pdb

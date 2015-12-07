@@ -80,7 +80,7 @@ namespace SVMAssembler
                 case "push8":
                     long testValue = long.Parse(token.ArgumentAtIndex(0));
 
-                    if (testValue < 0 || testValue > byte.MaxValue) Logger.Instance.LogWarning(ErrorHelper.SizeMisMatch(token, sizeof(byte)));
+                    if (testValue < 0 || testValue > byte.MaxValue) Logger.Instance.Log(ErrorHelper.SizeMisMatch(token, sizeof(byte)), LogLevel.Warning);
 
                     byte byteValue = (byte)testValue;
 
@@ -89,7 +89,7 @@ namespace SVMAssembler
                 case "push16":
                     testValue = long.Parse(token.ArgumentAtIndex(0));
 
-                    if (testValue > short.MaxValue) Logger.Instance.LogWarning(ErrorHelper.SizeMisMatch(token, sizeof(short)));
+                    if (testValue > short.MaxValue) Logger.Instance.Log(ErrorHelper.SizeMisMatch(token, sizeof(short)), LogLevel.Warning);
 
                     short shortValue = (short)testValue;
 
@@ -98,7 +98,7 @@ namespace SVMAssembler
                 case "push32":
                     testValue = long.Parse(token.ArgumentAtIndex(0));
 
-                    if (testValue > int.MaxValue) Logger.Instance.LogWarning(ErrorHelper.SizeMisMatch(token, sizeof(int)));
+                    if (testValue > int.MaxValue) Logger.Instance.Log(ErrorHelper.SizeMisMatch(token, sizeof(int)), LogLevel.Warning);
 
                     int intValue = (int)testValue;
 
@@ -179,7 +179,7 @@ namespace SVMAssembler
 
         public BytecodeBuffer GenerateCode(IEnumerable<Token> tokens)
         {
-            Logger.Instance.LogMessage("Generating code...");
+            Logger.Instance.Log("Generating code...", LogLevel.Message);
 
             buffer.Clear();
 

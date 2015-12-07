@@ -15,7 +15,7 @@ namespace SVMAssembler
 
         public string[] Link(string[] lines)
         {
-            Logger.Instance.LogMessage("Linking...");
+            Logger.Instance.Log("Linking...", LogLevel.Message);
 
             // Find entrypoint files linkakes.
             string[] linkages = lines.Where(l => Statements.IsLink(l))

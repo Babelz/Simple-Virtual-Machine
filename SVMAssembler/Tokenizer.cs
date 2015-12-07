@@ -30,9 +30,13 @@ namespace SVMAssembler
                 {
                     // Is an opcode.
                     TokenType type = TokenType.Opcode;
+
                     string instruction = tokens[0].Trim();
+                    
                     string[] arguments = new string[tokens.Length - 1];
+                    
                     string rawLine = line;
+                    
                     int linenumber = i + 1;
 
                     // Copy args.

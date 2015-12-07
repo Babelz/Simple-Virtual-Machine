@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 
 namespace SVMAssembler
 {
+    public enum LogLevel : byte
+    {
+        Error,
+        Warning,
+        Message
+    }
+
     public sealed class Logger
     {
         #region Fields
-        private readonly List<string> errors;
-        private readonly List<string> warnings;
-        private readonly List<string> messages;
+        private readonly List<string>[] buffers;
         #endregion
 
         #region Properties
@@ -19,7 +24,7 @@ namespace SVMAssembler
         {
             get
             {
-                return errors.Count > 0;
+                return buffers[(uint)LogLevel.Error].Count > 0;
             }
         }
         #endregion
@@ -43,48 +48,25 @@ namespace SVMAssembler
 
         private Logger()
         {
-            errors = new List<string>();
-            warnings = new List<string>();
-            messages = new List<string>();
+            buffers = new List<string>[]
+            {
+                new List<string>(),
+                new List<string>(),
+                new List<string>()
+            };
         }
 
-        public void LogError(string error)
+        public void Log(string message, LogLevel logLevel)
         {
-            errors.Add(error);
+            buffers[(uint)logLevel].Add(message);
         }
-        public void LogWarning(string warning)
+        public IEnumerable<string> GetMessages(LogLevel logLevel)
         {
-            warnings.Add(warning);
+            return buffers[(uint)logLevel];
         }
-        public void LogMessage(string message)
+        public void ClearMessages(LogLevel logLevel)
         {
-            messages.Add(message);
-        }
-
-        public void ClearErrors()
-        {
-            errors.Clear();
-        }
-        public void ClearWarnings()
-        {
-            warnings.Clear();
-        }
-        public void ClearMessages()
-        {
-            messages.Clear();
-        }
-
-        public IEnumerable<string> GetErrors()
-        {
-            return errors;
-        }
-        public IEnumerable<string> GetWarnings()
-        {
-            return warnings;
-        }
-        public IEnumerable<string> GetMessages()
-        {
-            return messages;
+            buffers[(uint)logLevel].Clear();
         }
     }
 }
